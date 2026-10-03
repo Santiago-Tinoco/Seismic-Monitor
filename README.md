@@ -13,10 +13,16 @@ estadísticamente significativas respecto a su propio comportamiento histórico.
 
 Requiere Python 3.10 o superior (probado con 3.13).
 
+### 1. Descargar este repositorio como .zip
+
+### 2. Descomprimir el archivo .zip en una carpeta llamada "monitor_sismico" y copie la ruta de esta carpeta
+
+### 3. Abra Anaconda Powershell Prompt y corra el siguiente codigo
+
 ```bash
-cd seismic_monitor
-python -m venv .venv
-# Windows: .venv\Scripts\activate      macOS/Linux: source .venv/bin/activate
+cd "C:/ruta/hasta/monitor_sismico"
+conda create -n seismic_monitor python=3.13
+conda activate seismic_monitor
 pip install -r requirements.txt
 ```
 
@@ -24,8 +30,15 @@ pip install -r requirements.txt
 
 ```bash
 python scripts/build_catalog.py   # procesa el CSV (≈10 s); repetir solo si cambia el CSV
-python app.py                     # abrir http://127.0.0.1:8050
+python app.py
 python tests/test_methods.py      # validación de los métodos (o: python -m pytest tests -q)
+```
+
+Una vez ya haya corrido "python scripts/build_catalog.py" por primera vez, cada que vuelva a iniciar la
+aplicación no es necesario volverlo a correr, simplemente corra
+
+```bash
+python app.py
 ```
 
 ## 3. Estructura
