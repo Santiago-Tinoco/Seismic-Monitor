@@ -20,9 +20,6 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-No hay variables de entorno obligatorias. Las opcionales son `PORT` (8050 por defecto), `HOST` (127.0.0.1) y
-`DASH_DEBUG=1`.
-
 ## 2. Ejecución
 
 ```bash
@@ -30,9 +27,6 @@ python scripts/build_catalog.py   # procesa el CSV (≈10 s); repetir solo si ca
 python app.py                     # abrir http://127.0.0.1:8050
 python tests/test_methods.py      # validación de los métodos (o: python -m pytest tests -q)
 ```
-
-Los mapas usan la cartografía Natural Earth incluida en `assets/topojson/`, así que funcionan sin conexión a
-internet. Las fuentes IBM Plex se cargan de Google Fonts; sin conexión, el navegador usa una fuente de reserva.
 
 ## 3. Estructura
 
