@@ -29,15 +29,16 @@ pip install -r requirements.txt
 ## 2. Ejecución
 
 ```bash
-python scripts/build_catalog.py   # procesa el CSV (≈10 s); repetir solo si cambia el CSV
+python scripts/build_catalog.py
 python app.py
 python tests/test_methods.py      # validación de los métodos (o: python -m pytest tests -q)
 ```
 
 Una vez ya haya corrido "python scripts/build_catalog.py" por primera vez, cada que vuelva a iniciar la
-aplicación no es necesario volverlo a correr, simplemente corra
+aplicación no es necesario volverlo a correr, simplemente corra:
 
 ```bash
+conda activate seismic_monitor
 python app.py
 ```
 
