@@ -1,0 +1,7 @@
+# Probado con Python 3.13
+dash>=3.0,<5
+plotly>=6.0,<8
+pandas>=2.1
+numpy>=1.25
+scipy>=1.11
+pyarrow>=14
