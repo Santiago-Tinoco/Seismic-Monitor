@@ -130,7 +130,6 @@ componente está en la pestaña *Datos y método*.
   usa solo la tasa de eventos.
 - **Comparación regional:** cada región contra su propio historial, ordenadas geográficamente, con q-valores de
   Benjamini-Hochberg.
-- **No se implementa** índice compuesto ni machine learning (la justificación está en la app).
 
 Las ecuaciones completas están en la pestaña *Datos y método → Metodología*.
 
@@ -149,9 +148,6 @@ Las ecuaciones completas están en la pestaña *Datos y método → Metodología
 9. el declustering marca réplicas cercanas y no eventos lejanos;
 10. el percentil del catálogo real coincide con un recálculo independiente.
 
-Comprobación manual sugerida: descargar *ventanas históricas (CSV)* y recalcular el percentil en Excel con
-`(CONTAR.SI(<actual) + 0.5·CONTAR.SI(=actual)) / n`.
-
 ## 8. Limitaciones
 
 - Una anomalía estadística no implica causalidad ni permite predecir un terremoto.
@@ -165,12 +161,11 @@ Comprobación manual sugerida: descargar *ventanas históricas (CSV)* y recalcul
 - Las ventanas móviles se solapan y hay autocorrelación temporal por las réplicas.
 - Las cajas regionales son una decisión de análisis; la sección de sensibilidad muestra la dependencia de la
   ventana y de la magnitud mínima.
-- Computacionalmente: los resultados se cachean en memoria (`lru_cache`), así que la primera consulta de cada
-  combinación tarda ≈0.1–0.5 s. La app está pensada para uso local o académico, no para muchos usuarios
-  simultáneos.
+- Los resultados se cachean en memoria (`lru_cache`), así que la primera consulta de cada
+  combinación tarda ≈0.1–0.5 s. La app está pensada para uso académico.
 
 ## 9. Actualizar el catálogo
 
 Reemplace `data/raw/Significant_Earthquakes.csv` por una descarga más reciente con las mismas columnas (por ejemplo,
 de la API FDSN del USGS con `minmagnitude=5`) y vuelva a ejecutar `python scripts/build_catalog.py`. La línea base y
-la ventana reciente se recalculan solas a partir de la nueva fecha final.
+la ventana reciente se recalculan solas a partir de la nueva fecha final, ya que el database se actualiza todo el tiempo.
