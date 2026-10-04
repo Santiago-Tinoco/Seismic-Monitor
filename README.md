@@ -76,8 +76,7 @@ seismic_monitor/
 └── tests/test_methods.py
 ```
 
-Flujo: `DATA → PROCESSING (build_catalog) → STATISTICS (statistics, seismic_analysis, clustering) →
-ANOMALY ENGINE (anomaly_detection) → VISUALIZATION (components) → UI (app.py)`.
+
 
 ## 4. Dataset
 
