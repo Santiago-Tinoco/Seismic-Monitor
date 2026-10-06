@@ -36,8 +36,8 @@ def region_options(region_type):
 
 
 app = Dash(__name__, title="Monitor de Actividad Sísmica", suppress_callback_exceptions=True,
-           external_stylesheets=["https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500"
-                                 "&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"])
+           external_stylesheets=["https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..8001,300..800"
+                                 "&display=swap"])
 server = app.server
 app.layout = main_layout(day_to_timestamp(catalog_end_day()), region_options("region"), DEFAULT_REGION)
 
