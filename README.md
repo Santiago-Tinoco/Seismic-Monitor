@@ -15,12 +15,12 @@ Requiere Python 3.10 o superior (probado con 3.13).
 
 ### 1. Descargar este repositorio como .zip
 
-### 2. Descomprimir el archivo .zip en una carpeta llamada "monitor_sismico" y copie la ruta de esta carpeta
+### 2. Descomprimir el archivo .zip y copie la ruta de esta carpeta
 
 ### 3. Abra Anaconda Powershell Prompt y corra el siguiente codigo
 
 ```bash
-cd "C:/ruta/hasta/monitor_sismico"
+cd "C:/ruta/hasta/Seismic-Monitor-main"
 conda create -n seismic_monitor python=3.13
 conda activate seismic_monitor
 pip install -r requirements.txt
