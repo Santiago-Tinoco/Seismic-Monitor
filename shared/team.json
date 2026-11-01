@@ -1,0 +1,11 @@
+{
+  "_instrucciones": "Editar esta lista para agregar o corregir integrantes y roles; luego ejecutar sync_shared.py. Ambas apps la leen.",
+  "institucion": "Universidad del Norte",
+  "programa": "Geología",
+  "curso": "Análisis Exploratorio de Datos (EDA)",
+  "periodo": "2026-2",
+  "integrantes": [
+    {"nombre": "Alejandra Fuentes", "rol": "", "contacto": ""},
+    {"nombre": "Santiago Tinoco", "rol": "", "contacto": ""}
+  ]
+}

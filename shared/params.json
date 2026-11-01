@@ -1,0 +1,21 @@
+{
+  "_descripcion": "Parámetros comunes a Dash y Shiny. Cambiar aquí y ejecutar sync_shared.py para copiarlos a ambas apps.",
+  "analysis_start": "1973-01-01",
+  "default_end": "2026-08-21",
+  "catalog_min_mag": 5.0,
+  "mag_bin": 0.1,
+  "energy": {"a": 1.5, "b": 4.8, "unidad": "J", "referencia": "Gutenberg & Richter (1956)"},
+  "frequencies": ["D", "W", "M", "Y"],
+  "freq_labels": {"D": "Día", "W": "Semana (lunes a domingo)", "M": "Mes", "Y": "Año"},
+  "acf_max_lags": 48,
+  "missing_tolerance": 0.05,
+  "mann_kendall_max_n": 3000,
+  "anomaly_window": {"D": 90, "W": 52, "M": 24, "Y": 10},
+  "anomaly_z": 3.5,
+  "changepoint_min_seg": {"D": 365, "W": 104, "M": 24, "Y": 5},
+  "changepoint_max": 6,
+  "stl": {"period": 12, "seasonal": 13, "trend": 23, "low_pass": 13, "inner": 1, "outer": 15},
+  "forecast": {"test_months": 36, "horizons": [6, 12, 24], "default_horizon": 12, "ses_alpha_grid_step": 0.01,
+               "ses_l0_n": 12, "arima_order": [1, 0, 1], "ljung_box_lag": 12},
+  "fixed_depths_km": [10.0, 33.0, 35.0]
+}

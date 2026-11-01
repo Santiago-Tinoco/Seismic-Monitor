@@ -38,7 +38,7 @@ def fig_percentile_strip(table: pd.DataFrame):
         marker=dict(size=13, color=[STATUS_COLOR[c] for c in t.loc[valid, "estado_codigo"]],
                     line=dict(color="white", width=2)),
         text=[percentile_label(p) for p in t.loc[valid, "percentil"]], textposition="middle right",
-        textfont=dict(size=11, color=COLORS["muted"]),
+        textfont=dict(size=12, color=COLORS["muted"]),
         customdata=np.stack([t.loc[valid, "actual_txt"], t.loc[valid, "mediana_hist_txt"],
                              t.loc[valid, "estado"], t.loc[valid, "catalogo"]], axis=-1),
         hovertemplate="<b>%{y}</b><br>Actual: %{customdata[0]}<br>Mediana histórica: %{customdata[1]}"
@@ -47,13 +47,13 @@ def fig_percentile_strip(table: pd.DataFrame):
     na_names = [n for n, v in zip(names, valid) if not v]
     if na_names:
         fig.add_trace(go.Scatter(x=[50] * len(na_names), y=na_names, mode="text", text=["no evaluable"] * len(na_names),
-                                 textfont=dict(size=11, color=COLORS["na"]), hoverinfo="skip", showlegend=False))
+                                 textfont=dict(size=12, color=COLORS["na"]), hoverinfo="skip", showlegend=False))
     fig.update_xaxes(range=[0, 108], tickvals=[0, 5, 25, 50, 75, 95, 100], title="Percentil respecto a ventanas históricas comparables")
     fig.update_yaxes(categoryorder="array", categoryarray=names, gridcolor="rgba(0,0,0,0)")
     fig.update_layout(height=330, margin=dict(l=170, r=20, t=16, b=48))
     fig.add_annotation(x=(P_LOW + P_HIGH) / 2, y=1.04, yref="paper", showarrow=False,
                        text=f"rango histórico habitual (P{P_LOW:.0f}–P{P_HIGH:.0f})",
-                       font=dict(size=10, color=COLORS["muted"]))
+                       font=dict(size=11, color=COLORS["muted"]))
     return fig
 
 
@@ -165,10 +165,10 @@ def fig_baseline_distribution(res: dict):
     for v, lab in zip(q, ["P5", "P50", "P95"]):
         fig.add_vline(x=v, line=dict(color=COLORS["hist_dark"], width=1, dash="dot"))
         fig.add_annotation(x=v, y=1.0, yref="paper", text=lab, showarrow=False, yshift=8,
-                           font=dict(size=10, color=COLORS["muted"]))
+                           font=dict(size=11, color=COLORS["muted"]))
     fig.add_vline(x=cur, line=dict(color=COLORS["recent"], width=3))
     fig.add_annotation(x=cur, y=0.82, yref="paper", text=f"<b>Actual: {cur:.0f}</b><br>{percentile_label(res['table'].iloc[0]['percentil'])}",
-                       showarrow=False, xanchor="left", xshift=6, font=dict(color=COLORS["recent"], size=12),
+                       showarrow=False, xanchor="left", xshift=6, font=dict(color=COLORS["recent"], size=13),
                        bgcolor="rgba(255,255,255,0.85)")
     fig.update_layout(height=320, bargap=0.08, xaxis_title=f"Eventos por ventana de {res['window_days']:.0f} días",
                       yaxis_title="Fracción de ventanas", showlegend=False)
@@ -225,7 +225,7 @@ def fig_gutenberg_richter(mf: dict):
                                      name=f"Ajuste {name.lower()}: b = {s['b']:.2f}", hoverinfo="skip"))
     fig.add_vline(x=mc, line=dict(color=COLORS["ink"], width=1, dash="dot"))
     fig.add_annotation(x=mc, y=1, yref="paper", text=f"Mc = {mc:.1f}", showarrow=False, xanchor="left", xshift=4,
-                       font=dict(size=11, color=COLORS["ink"]))
+                       font=dict(size=12, color=COLORS["ink"]))
     fig.update_yaxes(type="log", dtick=1, title="Eventos por año con magnitud ≥ M (escala log)")
     fig.update_xaxes(title="Magnitud M")
     fig.update_layout(height=380)
@@ -248,7 +248,7 @@ def fig_b_series(mf: dict):
     if mf["hist"]["valid"]:
         fig.add_hline(y=mf["hist"]["b"], line=dict(color=COLORS["hist_dark"], width=1, dash="dash"),
                       annotation_text=f"b histórico = {mf['hist']['b']:.2f}", annotation_position="top left",
-                      annotation_font=dict(size=10, color=COLORS["muted"]))
+                      annotation_font=dict(size=11, color=COLORS["muted"]))
     fig.update_layout(height=320, yaxis_title="b-value (± 1.96 σ Shi-Bolt)",
                       xaxis_title=f"Periodos consecutivos de {mf['years_rec']} años (el último es el reciente)")
     return fig
@@ -306,6 +306,6 @@ def fig_annual_counts(annual: dict, start_year: int):
     fig = go.Figure(go.Bar(x=yrs, y=n, marker=dict(color=colors), hovertemplate="%{x}: %{y:,} eventos<extra></extra>"))
     fig.add_vline(x=start_year - 0.5, line=dict(color=COLORS["ink"], width=1, dash="dot"))
     fig.add_annotation(x=start_year - 0.5, y=1, yref="paper", text=f"inicio del catálogo de trabajo ({start_year})",
-                       showarrow=False, xanchor="right", xshift=-4, font=dict(size=11, color=COLORS["ink"]))
+                       showarrow=False, xanchor="right", xshift=-4, font=dict(size=12, color=COLORS["ink"]))
     fig.update_layout(height=300, yaxis_title="Eventos M ≥ 5 por año", xaxis_title="Año", bargap=0.1)
     return fig

@@ -1,0 +1,312 @@
+{
+ "Norte de los Andes": {
+  "boxes": [
+   [
+    -5,
+    13,
+    -82,
+    -66
+   ]
+  ],
+  "contexto": "Subducción de Nazca bajo Sudamérica (Colombia, Ecuador, occidente de Venezuela); incluye el nido de Bucaramanga."
+ },
+ "Perú": {
+  "boxes": [
+   [
+    -18,
+    -5,
+    -82,
+    -66
+   ]
+  ],
+  "contexto": "Subducción de Nazca bajo Sudamérica."
+ },
+ "Chile norte": {
+  "boxes": [
+   [
+    -28,
+    -18,
+    -76,
+    -62
+   ]
+  ],
+  "contexto": "Subducción de Nazca; incluye sismicidad intermedia bajo Bolivia y el noroeste argentino."
+ },
+ "Chile centro-sur": {
+  "boxes": [
+   [
+    -46,
+    -28,
+    -78,
+    -62
+   ]
+  ],
+  "contexto": "Subducción de Nazca bajo Sudamérica."
+ },
+ "México": {
+  "boxes": [
+   [
+    14,
+    22,
+    -110,
+    -94
+   ]
+  ],
+  "contexto": "Subducción de Cocos y Rivera bajo Norteamérica."
+ },
+ "Centroamérica": {
+  "boxes": [
+   [
+    7,
+    16,
+    -94,
+    -82
+   ]
+  ],
+  "contexto": "Subducción de Cocos bajo la placa Caribe."
+ },
+ "Caribe": {
+  "boxes": [
+   [
+    13,
+    21,
+    -76,
+    -58
+   ],
+   [
+    10,
+    13,
+    -66,
+    -58
+   ]
+  ],
+  "contexto": "Límite Caribe–Norteamérica: La Española, Puerto Rico y arco de las Antillas Menores."
+ },
+ "California–Cascadia": {
+  "boxes": [
+   [
+    32,
+    50,
+    -130,
+    -114
+   ]
+  ],
+  "contexto": "Sistema de San Andrés, zona de Mendocino y subducción de Cascadia."
+ },
+ "Aleutianas–Alaska": {
+  "boxes": [
+   [
+    50,
+    64,
+    165,
+    180
+   ],
+   [
+    50,
+    64,
+    -180,
+    -140
+   ]
+  ],
+  "contexto": "Subducción del Pacífico bajo Norteamérica."
+ },
+ "Kuriles–Kamchatka": {
+  "boxes": [
+   [
+    42,
+    60,
+    140,
+    165
+   ]
+  ],
+  "contexto": "Subducción del Pacífico (Hokkaido oriental, Kuriles, Kamchatka)."
+ },
+ "Japón": {
+  "boxes": [
+   [
+    30,
+    42,
+    128,
+    146
+   ]
+  ],
+  "contexto": "Subducción de las placas Pacífico y Filipinas (Honshu, Shikoku, Kyushu)."
+ },
+ "Izu-Bonin–Marianas": {
+  "boxes": [
+   [
+    10,
+    30,
+    136,
+    150
+   ]
+  ],
+  "contexto": "Subducción del Pacífico bajo la placa Filipinas."
+ },
+ "Ryukyu–Taiwán": {
+  "boxes": [
+   [
+    21,
+    30,
+    119,
+    132
+   ]
+  ],
+  "contexto": "Subducción de Filipinas bajo Eurasia y colisión de Taiwán."
+ },
+ "Filipinas": {
+  "boxes": [
+   [
+    5,
+    21,
+    116,
+    128
+   ]
+  ],
+  "contexto": "Fosas de Filipinas y de Manila."
+ },
+ "Sumatra–Andamán–Java": {
+  "boxes": [
+   [
+    -12,
+    15,
+    90,
+    105
+   ],
+   [
+    -12,
+    -5,
+    105,
+    120
+   ]
+  ],
+  "contexto": "Arco de la Sonda: subducción Indo-Australiana bajo la placa Sonda."
+ },
+ "Banda–Molucas": {
+  "boxes": [
+   [
+    -12,
+    5,
+    120,
+    135
+   ]
+  ],
+  "contexto": "Arco de Banda, Mar de Molucas y Sulawesi oriental."
+ },
+ "Nueva Guinea": {
+  "boxes": [
+   [
+    -12,
+    0,
+    135,
+    154
+   ]
+  ],
+  "contexto": "Nueva Guinea y Nueva Bretaña."
+ },
+ "Islas Salomón": {
+  "boxes": [
+   [
+    -13,
+    -4,
+    154,
+    164
+   ]
+  ],
+  "contexto": "Subducción de la placa Australiana bajo el Pacífico."
+ },
+ "Vanuatu": {
+  "boxes": [
+   [
+    -23,
+    -13,
+    164,
+    172
+   ]
+  ],
+  "contexto": "Subducción de la placa Australiana (fosa de Nuevas Hébridas)."
+ },
+ "Fiyi–Tonga–Kermadec": {
+  "boxes": [
+   [
+    -40,
+    -14,
+    176,
+    180
+   ],
+   [
+    -40,
+    -14,
+    -180,
+    -170
+   ]
+  ],
+  "contexto": "Subducción del Pacífico bajo la placa Australiana; incluye la sismicidad profunda de Fiyi."
+ },
+ "Nueva Zelanda": {
+  "boxes": [
+   [
+    -48,
+    -40,
+    165,
+    180
+   ]
+  ],
+  "contexto": "Límite Pacífico–Australia en Nueva Zelanda (Alpine Fault y Hikurangi sur)."
+ },
+ "Turquía–Egeo": {
+  "boxes": [
+   [
+    34,
+    42,
+    19,
+    44
+   ]
+  ],
+  "contexto": "Anatolia y arco Helénico."
+ },
+ "Irán–Zagros": {
+  "boxes": [
+   [
+    25,
+    40,
+    44,
+    64
+   ]
+  ],
+  "contexto": "Colisión Arabia–Eurasia."
+ },
+ "Hindu Kush–Pamir": {
+  "boxes": [
+   [
+    34,
+    40,
+    66,
+    76
+   ]
+  ],
+  "contexto": "Sismicidad intermedia de Hindu Kush y Pamir."
+ },
+ "Himalaya–Tíbet": {
+  "boxes": [
+   [
+    25,
+    34,
+    76,
+    100
+   ]
+  ],
+  "contexto": "Colisión India–Eurasia."
+ },
+ "Arco de Scotia": {
+  "boxes": [
+   [
+    -62,
+    -54,
+    -40,
+    -20
+   ]
+  ],
+  "contexto": "Fosa de Sandwich del Sur y límite Scotia–Sudamérica."
+ }
+}

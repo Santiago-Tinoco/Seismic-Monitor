@@ -1,0 +1,7 @@
+# Google App Engine (entorno estándar). Antes de desplegar ejecute localmente
+# `python scripts/build_catalog.py` para que data/processed/ se suba con la app.
+runtime: python312
+entrypoint: gunicorn app:server --workers 2 --timeout 120 --bind :$PORT
+instance_class: F4
+automatic_scaling:
+  max_instances: 2
