@@ -18,6 +18,20 @@ Diseño
 - Métricas en el conjunto de prueba: MAE, RMSE y MASE (escala = MAE del
   pronóstico ingenuo de un paso dentro del entrenamiento).
 - Intervalos: 80 % y 95 %. Para SES y ARIMA son gaussianos y se truncan en 0.
+- Pronóstico a un paso (validación móvil): con los parámetros del entrenamiento,
+  en cada mes de prueba se pronostica el mes siguiente usando la información
+  observada hasta el mes anterior. Muestra cómo el modelo sigue la dinámica,
+  algo que el pronóstico a varios meses (casi plano) no puede mostrar.
+- Trayectorias simuladas: escenarios posibles generados con la ecuación del
+  modelo y errores aleatorios (semilla fija). Ilustran la variabilidad mensual
+  esperada alrededor del pronóstico medio; no son predicciones.
+
+¿Por qué el pronóstico a varios meses es (casi) plano?
+    El ingenuo, la media y el SES pronostican un nivel constante por
+    construcción, y el ARIMA(1,0,1) vuelve a la media en pocos meses. Es el
+    resultado correcto para una serie sin tendencia ni estacionalidad marcadas:
+    el mejor valor esperado es el nivel actual, y la incertidumbre se expresa
+    en el ancho de los intervalos, no en la forma de la línea.
 """
 import warnings
 
@@ -85,7 +99,8 @@ def fit_ses(y, h):
     sigma = np.sqrt(np.sum(resid ** 2) / (y.size - 2))
     mean = np.repeat(last, h)
     sd = sigma * np.sqrt(1 + (np.arange(1, h + 1) - 1) * alpha ** 2)
-    return {"mean": mean, **_interval(mean, sd), "resid": resid, "alpha": alpha}
+    return {"mean": mean, **_interval(mean, sd), "resid": resid, "alpha": alpha, "l0": l0, "level": last,
+            "sigma": sigma}
 
 
 def fit_arima(y, h):
@@ -98,10 +113,73 @@ def fit_arima(y, h):
     mean = np.asarray(fc.predicted_mean)
     sd = np.sqrt(np.asarray(fc.var_pred_mean))
     params = dict(zip(res.model.param_names, res.params))
-    return {"mean": mean, **_interval(mean, sd), "resid": np.asarray(res.resid), "params": params}
+    return {"mean": mean, **_interval(mean, sd), "resid": np.asarray(res.resid), "params": params, "res": res}
 
 
 FITTERS = {"naive": fit_naive, "mean": fit_mean, "ses": fit_ses, "arima": fit_arima}
+
+
+# --------------------------------------------------------------------------
+# Pronóstico a un paso en el periodo de prueba (parámetros del entrenamiento)
+# --------------------------------------------------------------------------
+def one_step(y, ntr, model, fit):
+    """Pronósticos a un mes vista para y[ntr:], con los parámetros estimados en y[:ntr]."""
+    if model == "naive":
+        return y[ntr - 1:-1].copy()
+    if model == "mean":
+        return np.repeat(y[:ntr].mean(), y.size - ntr)
+    if model == "ses":
+        return ses_filter(y, fit["alpha"], fit["l0"])[0][ntr:]
+    if model == "arima":
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return np.asarray(fit["res"].apply(y).predict(start=ntr, end=y.size - 1))
+    raise ValueError(model)
+
+
+# --------------------------------------------------------------------------
+# Trayectorias simuladas (escenarios posibles, no predicciones)
+# --------------------------------------------------------------------------
+def simulate(y, model, h, n_paths=3, seed=2026):
+    """Simula `n_paths` trayectorias de `h` meses con la ecuación de cada modelo.
+
+    Ingenuo: paseo aleatorio; media: Binomial Negativa (o Poisson); SES: nivel
+    que se actualiza con α; ARIMA(1,0,1): recursión con φ, θ y μ desde el último
+    valor y el último residuo. Errores gaussianos con la σ estimada. Se truncan
+    en 0 y se redondean, porque son conteos.
+    """
+    rng = np.random.default_rng(seed)
+    y = np.asarray(y, float)
+    fit = FITTERS[model](y, h)
+    paths = np.empty((n_paths, h))
+    for i in range(n_paths):
+        if model == "naive":
+            sigma = np.std(np.diff(y), ddof=1)
+            paths[i] = y[-1] + np.cumsum(rng.normal(0, sigma, h))
+        elif model == "mean":
+            mu, var = y.mean(), y.var(ddof=1)
+            if var > mu > 0:
+                r = mu ** 2 / (var - mu)
+                paths[i] = rng.negative_binomial(r, r / (r + mu), h)
+            else:
+                paths[i] = rng.poisson(mu, h)
+        elif model == "ses":
+            lev = fit["level"]
+            for t in range(h):
+                e = rng.normal(0, fit["sigma"])
+                paths[i, t] = lev + e
+                lev = lev + fit["alpha"] * e
+        elif model == "arima":
+            p = fit["params"]
+            mu, phi, theta = p["const"], p["ar.L1"], p["ma.L1"]
+            sigma = np.sqrt(p["sigma2"])
+            prev_y, prev_e = y[-1], fit["resid"][-1]
+            for t in range(h):
+                e = rng.normal(0, sigma)
+                val = mu + phi * (prev_y - mu) + theta * prev_e + e
+                paths[i, t] = val
+                prev_y, prev_e = val, e
+    return np.round(np.maximum(paths, 0))
 
 
 def ljung_box(resid, lag):
@@ -119,16 +197,20 @@ def evaluate(series: pd.DataFrame, test_months=None):
     if y.size < test_months + 36:
         return None
     train, test = y[:-test_months], y[-test_months:]
+    ntr = train.size
     scale = np.mean(np.abs(np.diff(train)))
     lag = PARAMS["forecast"]["ljung_box_lag"]
     rows, paths = [], {}
     for key, f in FITTERS.items():
         fc = f(train, test_months)
         err = test - fc["mean"]
+        fc["one_step"] = one_step(y, ntr, key, fc)
+        err1 = test - fc["one_step"]
         lb, lbp = ljung_box(fc["resid"], lag)
         rows.append({"modelo": MODELS[key], "clave": key, "MAE": np.mean(np.abs(err)),
                      "RMSE": np.sqrt(np.mean(err ** 2)), "MASE": np.mean(np.abs(err)) / scale,
                      "cobertura_95": 100 * np.mean((test >= fc["lo95"]) & (test <= fc["hi95"])),
+                     "MAE_1paso": np.mean(np.abs(err1)), "MASE_1paso": np.mean(np.abs(err1)) / scale,
                      "ljung_box_p": lbp,
                      "detalle": (f"α = {fc['alpha']:.2f}" if key == "ses" else
                                  ", ".join(f"{k} = {v:.3f}" for k, v in fc["params"].items()) if key == "arima" else "")})

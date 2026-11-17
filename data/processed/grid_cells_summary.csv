@@ -1,0 +1,234 @@
+cell,n_eventos,nombre,lat0,lon0
+35|65,110,Afghanistan,35,65
+35|70,698,Afghanistan,35,70
+-55|25,67,Africa,-55,25
+50|-165,208,Alaska,50,-165
+50|-170,360,Alaska,50,-170
+50|-175,378,Alaska,50,-175
+50|-180,695,Alaska,50,-180
+50|170,131,Alaska,50,170
+50|175,338,Alaska,50,175
+55|-155,158,Alaska,55,-155
+55|-160,79,Alaska,55,-160
+60|-150,70,Alaska,60,-150
+60|-155,88,Alaska,60,-155
+40|15,74,Albania,40,15
+15|-65,160,Antigua and Barbuda,15,-65
+-30|-65,83,Argentina,-30,-65
+-30|-70,170,Argentina,-30,-70
+-35|-70,237,Argentina,-35,-70
+-5|-15,108,Ascension Island,-5,-15
+-5|-20,136,Ascension Island,-5,-20
+-65|150,105,Balleny Islands region,-65,150
+-55|5,64,Bouvet Island region,-55,5
+30|-120,104,CA,30,-120
+35|-120,84,California,35,-120
+45|-130,82,Canada,45,-130
+50|-135,103,Canada,50,-135
+-5|65,103,Carlsberg Ridge,-5,65
+-20|-70,256,Chile,-20,-70
+-25|-70,790,Chile,-25,-70
+-25|-75,283,Chile,-25,-75
+-30|-75,389,Chile,-30,-75
+-35|-75,830,Chile,-35,-75
+-40|-75,408,Chile,-40,-75
+-50|-80,83,Chile,-50,-80
+25|100,116,China,25,100
+30|100,104,China,30,100
+30|90,78,China,30,90
+30|95,78,China,30,95
+35|75,129,China,35,75
+35|95,87,China,35,95
+40|75,106,China,40,75
+40|80,69,China,40,80
+0|-80,176,Colombia,0,-80
+5|-75,166,Colombia,5,-75
+5|-80,215,Colombia,5,-80
+10|40,116,Djibouti,10,40
+15|-70,95,Dominican Republic,15,-70
+-40|-100,99,Easter Island,-40,-100
+-40|-105,152,Easter Island,-40,-105
+-25|-115,98,Easter Island region,-25,-115
+-30|-115,145,Easter Island region,-30,-115
+-5|-80,210,Ecuador,-5,-80
+-5|-85,134,Ecuador,-5,-85
+-20|-180,1505,Fiji,-20,-180
+-20|175,225,Fiji,-20,175
+-20|170,68,Fiji region,-20,170
+30|25,68,Greece,30,25
+35|20,287,Greece,35,20
+35|25,213,Greece,35,25
+40|20,66,Greece,40,20
+10|140,653,Guam,10,140
+10|145,261,Guam,10,145
+10|-95,563,Guatemala,10,-95
+60|-20,80,Iceland,60,-20
+10|90,319,India,10,90
+25|90,80,India,25,90
+25|95,110,India,25,95
+30|75,69,India,30,75
+-10|100,461,Indonesia,-10,100
+-10|105,520,Indonesia,-10,105
+-10|110,286,Indonesia,-10,110
+-10|115,386,Indonesia,-10,115
+-10|120,559,Indonesia,-10,120
+-10|130,584,Indonesia,-10,130
+-15|110,156,Indonesia,-15,110
+-15|115,285,Indonesia,-15,115
+-15|120,84,Indonesia,-15,120
+-5|100,703,Indonesia,-5,100
+-5|115,81,Indonesia,-5,115
+-5|120,480,Indonesia,-5,120
+-5|125,689,Indonesia,-5,125
+-5|130,518,Indonesia,-5,130
+-5|135,804,Indonesia,-5,135
+-5|95,279,Indonesia,-5,95
+0|120,610,Indonesia,0,120
+0|125,2479,Indonesia,0,125
+0|90,200,Indonesia,0,90
+0|95,735,Indonesia,0,95
+5|90,673,Indonesia,5,90
+25|50,148,Iran,25,50
+25|55,200,Iran,25,55
+30|45,121,Iran,30,45
+30|55,80,Iran,30,55
+40|10,62,Italy,40,10
+20|125,79,Japan,20,125
+25|120,68,Japan,25,120
+25|125,488,Japan,25,125
+25|130,196,Japan,25,130
+30|130,235,Japan,30,130
+30|135,379,Japan,30,135
+35|135,239,Japan,35,135
+35|140,1863,Japan,35,140
+40|135,129,Japan,40,135
+40|140,802,Japan,40,140
+20|140,329,Japan region,20,140
+25|135,115,Japan region,25,135
+25|140,552,Japan region,25,140
+30|140,540,Japan region,30,140
+-30|-180,1606,Kermadec Islands region,-30,-180
+-5|175,86,Kiribati region,-5,175
+45|150,880,Kuril Islands,45,150
+-55|140,77,Macquarie Island,-55,140
+-55|160,60,Macquarie Island,-55,160
+-60|145,159,Macquarie Island,-60,145
+-55|155,63,Macquarie Island region,-55,155
+20|145,90,Mariana Islands region,20,145
+15|-100,306,Mexico,15,-100
+15|-105,224,Mexico,15,-105
+15|-110,167,Mexico,15,-110
+15|-95,216,Mexico,15,-95
+20|-110,112,Mexico,20,-110
+25|-115,90,Mexico,25,-115
+-10|65,105,Mid-Indian Ridge,-10,65
+-15|65,109,Mid-Indian Ridge,-15,65
+-20|65,142,Mid-Indian Ridge,-20,65
+-25|65,91,Mid-Indian Ridge,-25,65
+-30|70,70,Mid-Indian Ridge,-30,70
+-40|75,113,Mid-Indian Ridge,-40,75
+20|90,172,Myanmar,20,90
+20|95,103,Myanmar,20,95
+25|85,108,Nepal,25,85
+-25|165,790,New Caledonia,-25,165
+-40|-180,110,New Zealand,-40,-180
+-40|175,404,New Zealand,-40,175
+-45|170,152,New Zealand,-45,170
+-50|165,93,New Zealand,-50,165
+-50|160,65,New Zealand region,-50,160
+10|-90,604,Nicaragua,10,-90
+15|145,536,Northern Mariana Islands,15,145
+40|-130,281,Oregon,40,-130
+10|55,142,Owen Fracture Zone region,10,55
+-55|-135,84,Pacific-Antarctic Ridge,-55,-135
+-60|-130,110,Pacific-Antarctic Ridge,-60,-130
+-60|-145,166,Pacific-Antarctic Ridge,-60,-145
+25|65,96,Pakistan,25,65
+30|65,62,Pakistan,30,65
+30|70,117,Pakistan,30,70
+0|-85,90,Panama,0,-85
+5|-85,368,Panama,5,-85
+-10|140,185,Papua New Guinea,-10,140
+-10|145,1201,Papua New Guinea,-10,145
+-10|150,2158,Papua New Guinea,-10,150
+-5|140,529,Papua New Guinea,-5,140
+-5|145,429,Papua New Guinea,-5,145
+-5|150,848,Papua New Guinea,-5,150
+-10|-75,138,Peru,-10,-75
+-10|-80,185,Peru,-10,-80
+-10|-85,63,Peru,-10,-85
+-15|-75,156,Peru,-15,-75
+-15|-80,274,Peru,-15,-80
+-20|-75,539,Peru,-20,-75
+10|120,476,Philippines,10,120
+10|125,511,Philippines,10,125
+15|115,88,Philippines,15,115
+15|120,436,Philippines,15,120
+5|120,436,Philippines,5,120
+5|125,1650,Philippines,5,125
+50|-40,65,Reykjanes Ridge,50,-40
+55|-35,126,Reykjanes Ridge,55,-35
+40|145,1270,Russia,40,145
+40|150,110,Russia,40,150
+45|140,64,Russia,45,140
+45|145,130,Russia,45,145
+45|155,363,Russia,45,155
+50|155,677,Russia,50,155
+50|160,639,Russia,50,160
+55|160,190,Russia,55,160
+60|165,64,Russia,60,165
+50|165,64,Russia region,50,165
+-10|-15,107,Saint Helena,-10,-15
+-10|155,898,Solomon Islands,-10,155
+-10|160,105,Solomon Islands,-10,160
+-15|160,830,Solomon Islands,-15,160
+-60|-35,65,South Georgia Island region,-60,-35
+-40|50,61,South Indian Ocean,-40,50
+-60|-25,229,South Sandwich Islands region,-60,-25
+-60|-30,1776,South Sandwich Islands region,-60,-30
+-65|-30,155,South Sandwich Islands region,-65,-30
+-65|-60,66,South Shetland Islands,-65,-60
+-30|60,61,Southwest Indian Ridge,-30,60
+-35|55,103,Southwest Indian Ridge,-35,55
+20|120,1068,Taiwan,20,120
+-10|125,1089,Timor Leste,-10,125
+-15|-175,86,Tonga,-15,-175
+-20|-175,1906,Tonga,-20,-175
+-25|-175,759,Tonga,-25,-175
+-25|-180,2103,Tonga,-25,-180
+35|35,105,Turkey,35,35
+35|40,94,Turkey,35,40
+-15|165,1911,Vanuatu,-15,165
+-20|165,1573,Vanuatu,-20,165
+-15|170,61,Vanuatu region,-15,170
+10|-65,109,Venezuela,10,-65
+-15|-180,96,Wallis and Futuna,-15,-180
+-45|-85,111,West Chile Rise,-45,-85
+-45|-90,97,West Chile Rise,-45,-90
+10|50,92,Yemen,10,50
+-10|-110,84,central East Pacific Rise,-10,-110
+-5|-105,80,central East Pacific Rise,-5,-105
+-5|-110,60,central East Pacific Rise,-5,-110
+0|-30,144,central Mid-Atlantic Ridge,0,-30
+0|-35,83,central Mid-Atlantic Ridge,0,-35
+5|-40,97,central Mid-Atlantic Ridge,5,-40
+5|-105,72,northern East Pacific Rise,5,-105
+10|-45,89,northern Mid-Atlantic Ridge,10,-45
+15|-50,69,northern Mid-Atlantic Ridge,15,-50
+20|-50,81,northern Mid-Atlantic Ridge,20,-50
+25|-45,101,northern Mid-Atlantic Ridge,25,-45
+-50|95,84,southeast Indian Ridge,-50,95
+-35|-110,70,southern East Pacific Rise,-35,-110
+-60|-125,76,southern East Pacific Rise,-60,-125
+-15|-15,138,southern Mid-Atlantic Ridge,-15,-15
+-20|-15,88,southern Mid-Atlantic Ridge,-20,-15
+-40|-20,112,southern Mid-Atlantic Ridge,-40,-20
+-45|-20,90,southern Mid-Atlantic Ridge,-45,-20
+-50|-15,64,southern Mid-Atlantic Ridge,-50,-15
+-25|175,350,the Fiji Islands,-25,175
+-30|175,172,the Fiji Islands,-30,175
+-35|-180,1793,the Kermadec Islands,-35,-180
+-35|175,133,the Kermadec Islands,-35,175
+-25|170,871,the Loyalty Islands,-25,170
+-55|135,74,western Indian-Antarctic Ridge,-55,135
+30|85,84,western Xizang,30,85

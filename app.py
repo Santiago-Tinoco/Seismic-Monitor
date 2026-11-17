@@ -1,4 +1,4 @@
-"""Proyecto EDA — Análisis de series de tiempo de terremotos (Dash).
+"""Sismicidad en el Tiempo — Visualización interactiva de series de tiempo de terremotos (Dash).
 
 Ejecutar (desde dash_app/):
     python scripts/build_catalog.py     # solo la primera vez o si cambia el CSV
@@ -39,14 +39,15 @@ NAV = [("/", "bi-house-door", "Inicio"),
        ("/equipo", "bi-people", "Equipo")]
 FILTER_PAGES = {"/eda-univariado", "/eda-multivariado", "/series", "/modelos", "/predecir"}
 
-# Tipografía Open Sans servida localmente desde assets/vendor/open-sans (Dash carga assets/ automáticamente)
-app = Dash(__name__, title="Proyecto EDA · Series de tiempo sísmicas", suppress_callback_exceptions=True)
+app = Dash(__name__, title="Sismicidad en el Tiempo · Series de tiempo sísmicas", suppress_callback_exceptions=True,
+           external_stylesheets=["https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500"
+                                 "&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"])
 server = app.server
 
 
 def sidebar():
     return html.Nav([
-        html.Div([html.Div("Proyecto EDA", className="side-brand"),
+        html.Div([html.Div("Sismicidad en el Tiempo", className="side-brand"),
                   html.Div("Series de tiempo de terremotos", className="side-sub")], className="side-head"),
         html.Div([dcc.Link([html.I(className=f"bi {icon}"), html.Span(label)], href=href, id=f"nav-{i}",
                            className="nav-link") for i, (href, icon, label) in enumerate(NAV)], className="nav-list"),
@@ -83,9 +84,9 @@ app.layout = html.Div([
     dcc.Store(id="pred-store", data={"model": "ses", "h": ts.PARAMS["forecast"]["default_horizon"]}),
     sidebar(),
     html.Div([
-        html.Header([html.Div([html.Span("Proyecto EDA", className="brand"),
-                               html.Span(" · Análisis de series de tiempo de terremotos", className="brand-theme")]),
-                     html.Div("Análisis Exploratorio de Datos Sísmicos · Evolución temporal de la actividad sísmica",
+        html.Header([html.Div([html.Span("Sismicidad en el Tiempo", className="brand"),
+                               html.Span(" · Visualización interactiva de series de tiempo de terremotos", className="brand-theme")]),
+                     html.Div("Catálogo USGS M ≥ 5 · 1973–2026 · Exploración, tendencias, anomalías y pronóstico",
                               className="brand-sub")], className="top-header"),
         filter_panel(),
         dcc.Loading(html.Div(id="page", className="page"), type="dot", color="#1f5f74"),

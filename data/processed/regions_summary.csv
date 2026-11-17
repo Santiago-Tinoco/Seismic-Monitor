@@ -1,0 +1,27 @@
+region,n_eventos,eventos_por_año,esperados_90d,habilitada,fraccion_dependiente_GK,n_cajas,contexto
+Norte de los Andes,989,18.44,4.54,True,0.364,1,"Subducción de Nazca bajo Sudamérica (Colombia, Ecuador, occidente de Venezuela); incluye el nido de Bucaramanga."
+Perú,1350,25.17,6.2,True,0.366,1,Subducción de Nazca bajo Sudamérica.
+Chile norte,1793,33.43,8.24,True,0.499,1,Subducción de Nazca; incluye sismicidad intermedia bajo Bolivia y el noroeste argentino.
+Chile centro-sur,1959,36.52,9.0,True,0.611,1,Subducción de Nazca bajo Sudamérica.
+México,856,15.96,3.93,True,0.466,1,Subducción de Cocos y Rivera bajo Norteamérica.
+Centroamérica,1494,27.85,6.86,True,0.57,1,Subducción de Cocos bajo la placa Caribe.
+Caribe,466,8.69,2.14,True,0.335,2,"Límite Caribe–Norteamérica: La Española, Puerto Rico y arco de las Antillas Menores."
+California–Cascadia,661,12.32,3.04,True,0.525,1,"Sistema de San Andrés, zona de Mendocino y subducción de Cascadia."
+Aleutianas–Alaska,2850,53.13,13.09,True,0.601,2,Subducción del Pacífico bajo Norteamérica.
+Kuriles–Kamchatka,4662,86.92,21.42,True,0.684,1,"Subducción del Pacífico (Hokkaido oriental, Kuriles, Kamchatka)."
+Japón,3952,73.68,18.16,True,0.676,1,"Subducción de las placas Pacífico y Filipinas (Honshu, Shikoku, Kyushu)."
+Izu-Bonin–Marianas,2623,48.9,12.05,True,0.509,1,Subducción del Pacífico bajo la placa Filipinas.
+Ryukyu–Taiwán,1798,33.52,8.26,True,0.592,1,Subducción de Filipinas bajo Eurasia y colisión de Taiwán.
+Filipinas,3767,70.23,17.31,True,0.662,1,Fosas de Filipinas y de Manila.
+Sumatra–Andamán–Java,5138,95.79,23.6,True,0.57,2,Arco de la Sonda: subducción Indo-Australiana bajo la placa Sonda.
+Banda–Molucas,7117,132.69,32.7,True,0.616,1,"Arco de Banda, Mar de Molucas y Sulawesi oriental."
+Nueva Guinea,5392,100.53,24.77,True,0.671,1,Nueva Guinea y Nueva Bretaña.
+Islas Salomón,2463,45.92,11.31,True,0.784,1,Subducción de la placa Australiana bajo el Pacífico.
+Vanuatu,3792,70.7,17.42,True,0.804,1,Subducción de la placa Australiana (fosa de Nuevas Hébridas).
+Fiyi–Tonga–Kermadec,11166,208.18,51.3,True,0.668,2,Subducción del Pacífico bajo la placa Australiana; incluye la sismicidad profunda de Fiyi.
+Nueva Zelanda,307,5.72,1.41,False,0.577,1,Límite Pacífico–Australia en Nueva Zelanda (Alpine Fault y Hikurangi sur).
+Turquía–Egeo,996,18.57,4.58,True,0.435,1,Anatolia y arco Helénico.
+Irán–Zagros,816,15.21,3.75,True,0.415,1,Colisión Arabia–Eurasia.
+Hindu Kush–Pamir,935,17.43,4.3,True,0.617,1,Sismicidad intermedia de Hindu Kush y Pamir.
+Himalaya–Tíbet,640,11.93,2.94,True,0.364,1,Colisión India–Eurasia.
+Arco de Scotia,2344,43.7,10.77,True,0.74,1,Fosa de Sandwich del Sur y límite Scotia–Sudamérica.

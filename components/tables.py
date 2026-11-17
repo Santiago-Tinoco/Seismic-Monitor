@@ -9,11 +9,11 @@ from src.statistics import percentile_label
 
 TABLE_STYLE = dict(
     style_table={"overflowX": "auto"},
-    style_cell={"fontFamily": "Open Sans, Arial, Helvetica, sans-serif", "fontSize": "14px", "padding": "6px 10px",
+    style_cell={"fontFamily": "IBM Plex Sans, sans-serif", "fontSize": "13px", "padding": "6px 10px",
                 "border": "none", "borderBottom": f"1px solid {COLORS['grid']}", "textAlign": "left",
                 "color": COLORS["ink"], "whiteSpace": "normal", "height": "auto"},
     style_header={"fontWeight": "600", "backgroundColor": "#f7f8f6", "color": COLORS["muted"],
-                  "borderBottom": "1px solid #c8cfd2", "fontSize": "13px"},
+                  "borderBottom": "1px solid #c8cfd2", "fontSize": "12px"},
 )
 
 

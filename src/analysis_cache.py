@@ -79,6 +79,11 @@ def model_forecast(k, model, h):
     return fc.forecast(series(k, "M"), model, h)
 
 
+@lru_cache(maxsize=32)
+def model_simulations(k, model, h):
+    return fc.simulate(series(k, "M")["n"].to_numpy(float), model, h)
+
+
 def descriptive(values):
     v = pd.Series(values, dtype=float).dropna()
     if v.empty:

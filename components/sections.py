@@ -1,4 +1,4 @@
-"""Contenido de las 11 secciones del Proyecto EDA (versión Dash)."""
+"""Contenido de las 11 secciones de Sismicidad en el Tiempo (versión Dash)."""
 import json
 from pathlib import Path
 
@@ -60,9 +60,9 @@ def page_inicio():
     k = ac.global_kpis()
     return [
         html.Div([
-            html.Div("PROYECTO EDA", className="eyebrow"),
-            html.H1("Análisis de series de tiempo de terremotos"),
-            html.P("Análisis Exploratorio de Datos Sísmicos · Evolución temporal de la actividad sísmica", className="lead"),
+            html.Div("VISUALIZACIÓN DE SERIES DE TIEMPO SÍSMICAS", className="eyebrow"),
+            html.H1("Sismicidad en el Tiempo"),
+            html.P("Visualización interactiva de series de tiempo de terremotos · Catálogo USGS M ≥ 5, 1973–2026", className="lead"),
             html.P("Objetivo general: analizar el comportamiento temporal de la actividad sísmica registrada en el "
                    "catálogo USGS M ≥ 5 (1973–2026) mediante análisis exploratorio, pruebas de series de tiempo y "
                    "modelos de pronóstico de conteos, a escala global y regional."),
@@ -411,12 +411,14 @@ def page_modelos(f, test_months, monitor_window):
 - **ARIMA(1,0,1) con media:** recoge la autocorrelación de corto plazo que muestran la ACF y la PACF. Supone estacionariedad alrededor de la media; las pruebas ADF/KPSS indican cambios de nivel, así que sus intervalos pueden ser optimistas.
 - **No se usó SARIMA:** la estacionalidad anual es débil (ver STL), así que un término estacional añadiría parámetros sin justificación.
 - **Validación temporal:** los últimos meses son el conjunto de prueba y nunca se usan para ajustar. Métricas: MAE, RMSE y MASE (MASE < 1 = mejor que el ingenuo de un paso dentro del entrenamiento).
+- **Dos formas de evaluar:** el pronóstico *a varios meses* se hace una sola vez al final del entrenamiento; el pronóstico *a un mes vista* usa en cada mes lo observado hasta el mes anterior, con los mismos parámetros. La segunda muestra cómo el modelo sigue la dinámica de la serie.
 """, className="markdown"))]
     if ev is None:
         return head + [html.Div("La serie mensual es demasiado corta para entrenar y evaluar con estos filtros.", className="warning-box")]
     tab = ev["table"].copy()
     best = tab.loc[tab["MASE"].idxmin()]
     view = tab.drop(columns="clave").rename(columns={"modelo": "Modelo", "cobertura_95": "Cobertura IC95 (%)",
+                                                     "MAE_1paso": "MAE a 1 mes", "MASE_1paso": "MASE a 1 mes",
                                                      "ljung_box_p": "Ljung-Box p (residuos)", "detalle": "Parámetros"})
     sel_model = best["clave"]
     blocks = head + [
@@ -424,6 +426,7 @@ def page_modelos(f, test_months, monitor_window):
                 f"Entrenamiento hasta {ev['train_end']:%Y-%m}; prueba {ev['test_periods'].iloc[0]:%Y-%m} → {ev['test_periods'].iloc[-1]:%Y-%m}",
                 [graph(tc.fig_model_test(s, ev, MODELS)),
                  simple_table(view, {"MAE": "{:.2f}", "RMSE": "{:.2f}", "MASE": "{:.3f}", "Cobertura IC95 (%)": "{:.1f}",
+                                     "MAE a 1 mes": "{:.2f}", "MASE a 1 mes": "{:.3f}",
                                      "Ljung-Box p (residuos)": "{:.3f}"}),
                  html.Button("Descargar evaluación (CSV)", id="btn-dl-eval", className="btn")],
                 interpretation=[f"Menor error en el periodo de prueba: {best['modelo']} (MASE = {best['MASE']:.3f}). "
@@ -470,21 +473,47 @@ def page_predecir_result(f, model, h):
     if len(s) < 72:
         return html.Div("La serie mensual es demasiado corta para pronosticar con estos filtros.", className="warning-box")
     fcst = ac.model_forecast(k, model, h)
+    sims = ac.model_simulations(k, model, h)
     ev = ac.model_eval(k, ts.PARAMS["forecast"]["test_months"])
     row = ev["table"].set_index("clave").loc[model] if ev else None
     tab = fcst.copy()
     tab["periodo"] = tab["periodo"].dt.strftime("%Y-%m")
     tab.columns = ["Mes", "Pronóstico", "IC80 inf.", "IC80 sup.", "IC95 inf.", "IC95 sup."]
-    return html.Div([
-        section("Serie observada y pronóstico", f"{MODELS[model]} · horizonte {h} meses · desde {fcst['periodo'].iloc[0]:%Y-%m}",
-                [graph(tc.fig_forecast(s, fcst, MODELS[model])),
+    last_obs, first_fc = s["periodo"].iloc[-1], fcst["periodo"].iloc[0]
+    incomplete = pd.Timestamp(f["end"]) < first_fc + pd.offsets.MonthEnd(0)
+    mu = s["n"].mean()
+    shape = {"naive": f"El ingenuo repite el último mes observado ({s['n'].iloc[-1]:.0f} eventos); por eso es una línea horizontal y sus intervalos se abren rápido.",
+             "mean": f"La media histórica pronostica el promedio del periodo ({mu:.1f} eventos/mes) para todos los meses; sus intervalos (Binomial Negativa) no cambian con el horizonte.",
+             "ses": f"El SES pronostica el último nivel suavizado ({fcst['pronostico'].iloc[0]:.1f} eventos/mes) para todos los meses: sin tendencia ni estacionalidad, el mejor valor esperado es el nivel actual.",
+             "arima": f"El ARIMA(1,0,1) parte del último mes y vuelve hacia la media de la serie ({fcst['pronostico'].iloc[0]:.1f} → {fcst['pronostico'].iloc[-1]:.1f} eventos/mes): la autocorrelación de corto plazo se diluye en pocos meses."}[model]
+    blocks = [
+        section("Serie observada y pronóstico", f"{MODELS[model]} · horizonte {h} meses · desde {first_fc:%Y-%m}",
+                [graph(tc.fig_forecast(s, fcst, MODELS[model], sims)),
                  simple_table(tab, {c: "{:.1f}" for c in tab.columns if c != "Mes"}),
                  html.Button("Descargar pronóstico (CSV)", id="btn-dl-forecast", className="btn")],
-                interpretation=[f"El modelo se reajusta con todos los meses completos hasta {s['periodo'].iloc[-1]:%Y-%m}. "
-                                "El primer mes pronosticado (agosto 2026) es el mes incompleto del catálogo.",
-                                (f"Desempeño en la validación temporal ({ts.PARAMS['forecast']['test_months']} meses): "
-                                 f"MAE = {row['MAE']:.1f}, RMSE = {row['RMSE']:.1f}, MASE = {row['MASE']:.3f}, cobertura "
-                                 f"del IC95 = {row['cobertura_95']:.0f} %." if row is not None else "")]),
+                interpretation=[
+                    f"El modelo se reajusta con todos los meses completos hasta {last_obs:%Y-%m}"
+                    + (f"; el primer mes pronosticado ({first_fc:%Y-%m}) está incompleto en el catálogo." if incomplete else "."),
+                    "¿Por qué la línea del pronóstico es (casi) plana? " + shape + " La línea es el valor esperado; "
+                    "los meses reales oscilarán alrededor de ella, como muestran las trayectorias simuladas (escenarios "
+                    "posibles generados con el mismo modelo, no predicciones). La incertidumbre está en el ancho de las bandas.",
+                    "Use los botones de la esquina del gráfico (3, 6, 15 años, Todo) para cambiar la ventana de tiempo y "
+                    "haga clic en la leyenda para ocultar o mostrar elementos."])]
+    if ev is not None:
+        blocks.append(section(
+            "Validación del modelo: pronóstico a un mes vista",
+            f"¿Cómo se habría comportado {MODELS[model]} en los últimos {ts.PARAMS['forecast']['test_months']} meses?",
+            graph(tc.fig_backtest(s, ev, model, MODELS[model])),
+            interpretation=[
+                "El modelo se ajusta solo con los meses anteriores al periodo de prueba. La línea discontinua gris es el "
+                "pronóstico hecho una sola vez al final del entrenamiento (varios meses hacia adelante); la línea azul "
+                "es el pronóstico a un mes vista, que en cada mes usa lo observado hasta el mes anterior.",
+                f"Pronóstico a varios meses: MAE = {row['MAE']:.1f}, RMSE = {row['RMSE']:.1f}, MASE = {row['MASE']:.3f}, "
+                f"cobertura del IC95 = {row['cobertura_95']:.0f} %. Pronóstico a un mes vista: MAE = {row['MAE_1paso']:.1f}, "
+                f"MASE = {row['MASE_1paso']:.3f}.",
+                "Los picos (meses con secuencias de réplicas) no se anticipan: el modelo reacciona al mes siguiente. "
+                "Por eso un MASE cercano o superior a 1 es esperable en esta serie."]))
+    return html.Div(blocks + [
         section("Supuestos y limitaciones", "Cómo leer este pronóstico", dcc.Markdown(f"""
 - **Qué se pronostica:** el número de eventos M ≥ {f['min_mag']:.1f} por mes en la región *{f['region']}* ({'catálogo completo' if f['catalog'] == 'complete' else 'catálogo desclusterizado'}). No se pronostican sismos individuales.
 - **Supuestos:** el proceso futuro se comporta como el pasado reciente (nivel y variabilidad); los cambios de red o de escalas de magnitud no se repiten; los intervalos de SES y ARIMA son gaussianos, se truncan en 0 y no incluyen la incertidumbre de los parámetros.
