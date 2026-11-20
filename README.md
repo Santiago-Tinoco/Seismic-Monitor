@@ -31,10 +31,3 @@ components/pages.py, charts.py, maps.py, tables.py, kpis.py, theme.py   componen
 assets/                    style.css, vendor/bootstrap-icons (iconos sin internet), topojson (mapas sin internet)
 Procfile, app.yaml         despliegue (Render/Heroku o Google App Engine)
 ```
-
-## Desplegar
-
-- **Google App Engine:** `python scripts/build_catalog.py && gcloud app deploy app.yaml`
-- **Render/Railway/Heroku:** conectar el repositorio. El `Procfile` construye los datos y arranca `gunicorn app:server`.
-
-Las variables de entorno `PORT`, `HOST` y `DASH_DEBUG` son opcionales.
