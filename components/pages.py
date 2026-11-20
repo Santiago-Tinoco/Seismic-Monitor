@@ -35,6 +35,13 @@ def catalog_badge(kind):
     return html.Span(CATALOG_LABEL[kind], className=cls)
 
 
+def tex(text, cls=""):
+    """Texto con fórmulas LaTeX en línea ($...$) renderizadas con MathJax; sin '$' queda como texto normal."""
+    if isinstance(text, str) and "$" in text:
+        return dcc.Markdown(text, mathjax=True, className=f"md-math {cls}".strip())
+    return text
+
+
 def section(title, question, body, badges=None, interpretation=None, extra=None):
     if badges:
         seen, uniq = set(), []
@@ -49,7 +56,7 @@ def section(title, question, body, badges=None, interpretation=None, extra=None)
     parts = head + (body if isinstance(body, list) else [body])
     if interpretation:
         items = interpretation if isinstance(interpretation, list) else [interpretation]
-        parts.append(html.Div([html.Div("Interpretación", className="eyebrow")] + [html.P(t) for t in items],
+        parts.append(html.Div([html.Div("Interpretación", className="eyebrow")] + [tex(t) if isinstance(t, str) and "$" in t else html.P(t) for t in items],
                               className="interpretation"))
     if extra:
         parts += extra if isinstance(extra, list) else [extra]
@@ -340,7 +347,7 @@ def page_anomalies(sel, res, sens):
     sens_txt = (f"{n_out} de {n_tot} combinaciones ventana × magnitud mínima quedan por encima del P{P_HIGH:.0f} y "
                 f"{n_below} por debajo del P{P_LOW:.0f}. Si la conclusión cambia al mover la ventana o la magnitud "
                 "mínima, la desviación depende de esa decisión y debe reportarse con cautela.")
-    help_items = [html.Li([html.Strong(r["indicador"] + ": "), INDICATOR_HELP[r["clave"]]]) for _, r in res["table"].iterrows()]
+    help_items = [html.Li([html.Strong(r["indicador"] + ": "), tex(INDICATOR_HELP[r["clave"]], "md-inline")]) for _, r in res["table"].iterrows()]
     return [
         context_bar(res, sel),
         warnings_box(res),
@@ -350,7 +357,7 @@ def page_anomalies(sel, res, sens):
                  html.Button("Descargar resultados de anomalía (CSV)", id="btn-dl-anomaly", className="btn")],
                 badges=[catalog_badge(sel.catalog), html.Span("agrupamiento: catálogo completo", className="badge badge-complete")],
                 interpretation=[percentile_note(),
-                                "Para el número de eventos se reportan además P(N ≥ actual) y P(N ≤ actual) bajo el "
+                                "Para el número de eventos se reportan además $P(N \\ge n_{\\text{actual}})$ y $P(N \\le n_{\\text{actual}})$ bajo el "
                                 "modelo de conteos ajustado a ventanas sin solapamiento. Son probabilidades del "
                                 "conteo observado bajo el comportamiento histórico, no probabilidades de un sismo."],
                 extra=[html.Details([html.Summary("Qué mide cada indicador"), html.Ul(help_items)], className="details")]),

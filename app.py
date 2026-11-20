@@ -4,6 +4,7 @@ Ejecutar (desde dash_app/):
     python scripts/build_catalog.py     # solo la primera vez o si cambia el CSV
     python app.py                       # http://127.0.0.1:8050
 """
+import json
 import os
 
 import numpy as np
@@ -25,6 +26,15 @@ if not CATALOG_PARQUET.exists():
 REPORT = load_json(QUALITY_JSON)
 REGIONS = load_regions_summary()
 REGION_OPTIONS = ["Global"] + REGIONS.loc[REGIONS["habilitada"], "region"].tolist()
+TEAM = json.loads((sec.SHARED / "team.json").read_text(encoding="utf-8"))
+
+
+def quakie_context():
+    """Datos para Quakie (assets/quakie/quakie.js): tipo de app y equipo, leídos de shared/team.json."""
+    return html.Div(id="quakie-ctx", hidden=True, **{
+        "data-app": "dash",
+        "data-team": json.dumps([m["nombre"] for m in TEAM["integrantes"]], ensure_ascii=False),
+        "data-inst": f"{TEAM['curso']} · {TEAM['programa']} · {TEAM['institucion']} · {TEAM['periodo']}"})
 
 NAV = [("/", "bi-house-door", "Inicio"),
        ("/introduccion", "bi-journal-text", "Introducción"),
@@ -93,6 +103,7 @@ app.layout = html.Div([
         html.Footer("Proyecto académico. Los análisis describen la actividad sísmica registrada; no predicen terremotos.",
                     className="footer"),
     ], className="content"),
+    quakie_context(),
     *[dcc.Download(id=i) for i in ("dl-uni", "dl-series", "dl-tests", "dl-eval", "dl-forecast", "dl-anomaly",
                                    "dl-sens", "dl-regional")],
 ], className="app-shell")
@@ -140,7 +151,7 @@ def render(path, f, pred):
     if path == "/modelos":
         return sec.page_modelos(f, ts.PARAMS["forecast"]["test_months"], 90)
     if path == "/predecir":
-        return [sec.page_title("Predecir", "Pronóstico estadístico del número mensual de eventos"), sec.filter_note(f),
+        return [sec.page_title("Predecir", "Pronóstico estadístico mensual de la variable elegida"), sec.filter_note(f),
                 html.Div(sec.DISCLAIMER, className="warning-box strong"),
                 sec.page_predecir_controls(pred["model"], pred["h"]),
                 dcc.Loading(html.Div(sec.page_predecir_result(f, pred["model"], pred["h"]), id="pred-result"),
@@ -217,15 +228,19 @@ def dl_uni(n, f):
 
 @app.callback(Output("dl-eval", "data"), Input("btn-dl-eval", "n_clicks"), State("filters", "data"), prevent_initial_call=True)
 def dl_eval(n, f):
-    ev = ac.model_eval(ac.key(f), ts.PARAMS["forecast"]["test_months"])
-    return dcc.send_data_frame(ev["table"].to_csv, f"evaluacion_modelos_{_tag(f)}.csv", index=False)
+    ev = ac.model_eval(ac.key(f), ts.PARAMS["forecast"]["test_months"], f.get("var", "n"))
+    if ev is None:
+        return None
+    return dcc.send_data_frame(ev["table"].to_csv, f"evaluacion_modelos_{f.get('var', 'n')}_{_tag(f)}.csv", index=False)
 
 
 @app.callback(Output("dl-forecast", "data"), Input("btn-dl-forecast", "n_clicks"), State("filters", "data"),
               State("pred-store", "data"), prevent_initial_call=True)
 def dl_forecast(n, f, p):
-    fc = ac.model_forecast(ac.key(f), p["model"], int(p["h"]))
-    return dcc.send_data_frame(fc.to_csv, f"pronostico_{p['model']}_{p['h']}m_{_tag(f)}.csv", index=False)
+    fc = ac.model_forecast(ac.key(f), p["model"], int(p["h"]), f.get("var", "n"))
+    if fc is None:
+        return None
+    return dcc.send_data_frame(fc.to_csv, f"pronostico_{f.get('var', 'n')}_{p['model']}_{p['h']}m_{_tag(f)}.csv", index=False)
 
 
 @app.callback(Output("dl-anomaly", "data"), Input("btn-dl-anomaly", "n_clicks"), State("mon-window", "value"),

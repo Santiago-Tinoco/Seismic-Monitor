@@ -9,7 +9,7 @@ GLOSSARY = {
          "y grandes. b ≈ 1 en la mayoría de regiones tectónicas.",
     "mc": "Magnitud de completitud: magnitud mínima por encima de la cual el catálogo se considera "
           "suficientemente completo para el análisis.",
-    "energia": "Energía sísmica radiada estimada con log10 E = 1.5M + 4.8 (julios). Es aditiva: se suman "
+    "energia": "Energía sísmica radiada estimada con log₁₀ E = 1.5 M + 4.8 (julios). Es aditiva: se suman "
                "energías, no magnitudes. Se muestra en escala logarítmica.",
     "tasa": "Número de eventos dividido por la duración de la ventana.",
     "iet": "Tiempo entre eventos consecutivos. Su coeficiente de variación (CV) vale ≈ 1 para ocurrencia "

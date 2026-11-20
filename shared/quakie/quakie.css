@@ -1,0 +1,85 @@
+/* Quakie — asistente de ayuda de "Sismicidad en el Tiempo" (idéntico en Dash y Shiny).
+   Usa la paleta y la tipografía del proyecto. */
+:root {
+  --qk-accent: #1f5f74;
+  --qk-accent-dark: #174a5b;
+  --qk-warm: #c4741c;
+  --qk-ink: #1d262b;
+  --qk-muted: #5d6b72;
+  --qk-line: #dfe3e4;
+  --qk-bg: #f4f5f2;
+}
+
+/* espacio libre al final de la página para que el botón nunca tape el último contenido */
+.content { padding-bottom: 88px; }
+
+.quakie-root { position: fixed; right: 20px; bottom: 20px; z-index: 2000;
+  font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; font-size: 14px; color: var(--qk-ink); }
+
+/* ---------- botón flotante ---------- */
+.quakie-fab { display: flex; align-items: center; gap: 8px; border: 0; cursor: pointer;
+  background: var(--qk-accent); color: #fff; border-radius: 999px; padding: 6px 14px 6px 6px;
+  box-shadow: 0 6px 18px rgba(23, 74, 91, .28); transition: transform .15s ease, background .15s ease; }
+.quakie-fab:hover { background: var(--qk-accent-dark); transform: translateY(-1px); }
+.quakie-fab:focus-visible { outline: 3px solid rgba(196, 116, 28, .55); outline-offset: 2px; }
+.quakie-fab .quakie-avatar { width: 40px; height: 40px; }
+.quakie-fab-label { font-weight: 600; letter-spacing: .02em; font-size: 14px; }
+.quakie-root.open .quakie-fab { background: var(--qk-accent-dark); }
+
+.quakie-avatar { display: block; flex: none; }
+.quakie-root:not(.open) .quakie-fab .qk-wave { animation: qk-wiggle 3.2s ease-in-out infinite; transform-origin: 50% 50%; }
+@keyframes qk-wiggle { 0%, 86%, 100% { transform: translateX(0); } 89% { transform: translateX(-1.2px); }
+  92% { transform: translateX(1.2px); } 95% { transform: translateX(-0.8px); } }
+@media (prefers-reduced-motion: reduce) { .quakie-fab .qk-wave { animation: none !important; } }
+
+/* ---------- ventana ---------- */
+.quakie-panel { position: absolute; right: 0; bottom: 62px; width: 360px; height: 500px;
+  max-height: calc(100vh - 110px); display: none; flex-direction: column; overflow: hidden;
+  background: #fff; border: 1px solid var(--qk-line); border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(29, 38, 43, .22); }
+.quakie-root.open .quakie-panel { display: flex; animation: qk-in .16s ease-out; }
+@keyframes qk-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.quakie-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: var(--qk-accent); color: #fff; }
+.quakie-head .quakie-avatar { width: 36px; height: 36px; }
+.quakie-title { font-weight: 700; font-size: 15px; line-height: 1.1; }
+.quakie-sub { font-size: 11.5px; opacity: .85; }
+.quakie-min { margin-left: auto; border: 0; background: rgba(255, 255, 255, .14); color: #fff; width: 30px;
+  height: 30px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; }
+.quakie-min:hover { background: rgba(255, 255, 255, .26); }
+
+.quakie-log { flex: 1; overflow-y: auto; padding: 12px; background: var(--qk-bg); }
+.qk-msg { max-width: 88%; margin: 0 0 10px; padding: 8px 11px; border-radius: 12px; line-height: 1.45;
+  white-space: normal; word-wrap: break-word; }
+.qk-bot { background: #fff; border: 1px solid var(--qk-line); border-top-left-radius: 4px; }
+.qk-user { margin-left: auto; background: var(--qk-accent); color: #fff; border-top-right-radius: 4px; }
+.qk-msg p { margin: 0 0 6px; } .qk-msg p:last-child { margin-bottom: 0; }
+.qk-msg ul { margin: 4px 0 6px; padding-left: 18px; } .qk-msg li { margin: 2px 0; }
+.qk-msg a { color: var(--qk-accent); }
+.qk-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.qk-chip { border: 1px solid #c9d4d7; background: #fff; color: var(--qk-accent); border-radius: 999px;
+  padding: 4px 10px; font: inherit; font-size: 12.5px; cursor: pointer; text-align: left; }
+.qk-chip:hover { background: #eef4f6; border-color: var(--qk-accent); }
+.qk-chip.qk-go { background: #fbf6ea; border-color: #e6d3a3; color: #8a4d10; }
+.qk-chip.qk-go:hover { background: #f6ecd4; }
+.qk-suggest { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 10px; }
+
+.quakie-form { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--qk-line); background: #fff; }
+.quakie-input { flex: 1; min-width: 0; border: 1px solid #c9d4d7; border-radius: 10px; padding: 8px 10px;
+  font: inherit; color: var(--qk-ink); }
+.quakie-input:focus { outline: none; border-color: var(--qk-accent); box-shadow: 0 0 0 3px rgba(31, 95, 116, .15); }
+.quakie-send { border: 0; background: var(--qk-accent); color: #fff; border-radius: 10px; padding: 0 12px;
+  cursor: pointer; font: inherit; font-weight: 600; }
+.quakie-send:hover { background: var(--qk-accent-dark); }
+.quakie-foot { font-size: 10.5px; color: var(--qk-muted); text-align: center; padding: 0 10px 8px; background: #fff; }
+
+/* ---------- pantallas pequeñas ---------- */
+@media (max-width: 600px) {
+  .quakie-root { right: 12px; bottom: 12px; }
+  .quakie-fab { padding: 5px; }
+  .quakie-fab-label { display: none; }
+  .quakie-panel { position: fixed; right: 8px; left: 8px; bottom: 70px; width: auto; height: 72vh; }
+}
+@media print { .quakie-root { display: none; } }

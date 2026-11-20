@@ -69,19 +69,26 @@ def gutenberg_richter(k):
     return {"mc": mc, "method": method, "summary": s, "fmd": sa.frequency_magnitude_table(m)}
 
 
-@lru_cache(maxsize=16)
-def model_eval(k, test_months):
-    return fc.evaluate(series(k, "M"), test_months)
+@lru_cache(maxsize=32)
+def model_data(k, var="n"):
+    """Serie mensual de la variable elegida + diagnóstico de suficiencia de datos."""
+    return fc.model_data(series(k, "M"), var)
 
 
 @lru_cache(maxsize=32)
-def model_forecast(k, model, h):
-    return fc.forecast(series(k, "M"), model, h)
+def model_eval(k, test_months, var="n"):
+    return fc.evaluate(series(k, "M"), test_months, var)
 
 
 @lru_cache(maxsize=32)
-def model_simulations(k, model, h):
-    return fc.simulate(series(k, "M")["n"].to_numpy(float), model, h)
+def model_forecast(k, model, h, var="n"):
+    return fc.forecast(series(k, "M"), model, h, var)
+
+
+@lru_cache(maxsize=32)
+def model_simulations(k, model, h, var="n"):
+    d = model_data(k, var)
+    return fc.simulate(d["y"], model, h, count=var == "n") if d["ok"] else None
 
 
 def descriptive(values):

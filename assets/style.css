@@ -228,3 +228,15 @@ html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
   .nav-list { display: flex; flex-wrap: wrap; }
   .kpi-grid, .nav-cards { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Ecuaciones (MathJax) */
+.md-math p { margin: 0 0 .35em; }
+.md-inline, .md-inline p { display: inline; margin: 0; }
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; margin: .5em 0 !important; }
+mjx-container { font-size: 105% !important; }
+.kpi-value mjx-container { font-size: 100% !important; }
+
+/* Video de presentación (Inicio) */
+.project-video { display: block; width: 100%; max-width: 1100px; margin: 0 auto; aspect-ratio: 1280 / 576;
+  background: #1d262b; border-radius: 10px; border: 1px solid #dfe3e4; }
+.video-caption { text-align: center; color: #5d6b72; font-size: 13px; margin: 8px 0 0; }

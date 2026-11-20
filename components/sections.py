@@ -8,10 +8,11 @@ from dash import dcc, html
 
 from components import ts_charts as tc
 from components.maps import GEO_STYLE
-from components.pages import graph, section
+from components.pages import graph, section, tex
 from components.tables import simple_table
 from src import analysis_cache as ac
 from src import timeseries as ts
+from src import forecasting as fcm
 from src.forecasting import MODELS
 
 SHARED = Path(__file__).resolve().parents[1] / "shared"
@@ -23,6 +24,20 @@ DISCLAIMER = ("Pronosticar la frecuencia estadística de eventos no equivale a p
 
 def md(name):
     return dcc.Markdown((SHARED / "content" / name).read_text(encoding="utf-8"), mathjax=True, className="markdown")
+
+
+def sci(v, digits=2):
+    """Número en notación LaTeX: 2.3e-05 -> 2.3 \\times 10^{-5} (mismo valor, solo cambia la escritura)."""
+    txt = f"{v:.{digits}g}"
+    if "e" not in txt:
+        return txt
+    m, e = txt.split("e")
+    return f"{m} \\times 10^{{{int(e)}}}"
+
+
+def thou(n):
+    """Entero con separador de miles dentro de una fórmula LaTeX (86{,}693)."""
+    return f"{int(n):,}".replace(",", "{,}")
 
 
 def fmt(v, f="{:,.2f}"):
@@ -41,9 +56,26 @@ def filter_note(f):
                     className="filter-note")
 
 
+def model_target(f):
+    """Variable que modelan Modelos y Predecir: la elegida en el filtro 'Variable', siempre en resolución mensual."""
+    var = f.get("var", "n")
+    label = TS_LABELS[var]
+    unit = fcm.UNITS.get(var, "")
+    ylab = "Eventos por mes" if var == "n" else f"{label} (mensual)"
+    return var, label, unit, ylab
+
+
+def model_note(d):
+    """Aviso con el motivo real cuando los datos no alcanzan, o advertencias si se pudo modelar."""
+    if not d["ok"]:
+        return html.Div([html.Strong("No se pueden ajustar los modelos con estos filtros. "), d["reason"]],
+                        className="warning-box")
+    return html.Div([html.P(w) for w in d["warnings"]], className="warning-box") if d["warnings"] else None
+
+
 def kpi(label, value, sub=""):
-    return html.Div([html.Div(label, className="kpi-label"), html.Div(value, className="kpi-value"),
-                     html.Div(sub, className="kpi-sub")], className="kpi")
+    return html.Div([html.Div(label, className="kpi-label"), html.Div(tex(value, "md-inline"), className="kpi-value"),
+                     html.Div(tex(sub, "md-inline"), className="kpi-sub")], className="kpi")
 
 
 # --------------------------------------------------------------------------
@@ -75,9 +107,10 @@ def page_inicio():
             kpi("Promedio mensual", f"{k['per_month']:.0f}", f"eventos/mes en {k['months']} meses completos"),
             kpi("Magnitud máxima", f"M {k['max_mag']:.1f}", f"{k['max_date']:%Y-%m-%d} · {k['max_place']}"),
             kpi("Profundidad mediana", f"{k['depth_median']:.0f} km", "todos los eventos"),
-            kpi("Energía total estimada", f"10^{k['energy_log10']:.1f} J", "suma de 10^(1.5M+4.8)"),
+            kpi("Energía total estimada", f"$10^{{{k['energy_log10']:.1f}}}\\ \\mathrm{{J}}$", "$\\sum_i 10^{1.5\\,M_i + 4.8}$"),
             kpi("Eventos en secuencias", f"{k['dependent_pct']:.0f} %", "réplicas/premonitores (Gardner-Knopoff)"),
         ], className="kpi-grid"),
+        video_section(),
         html.Div([dcc.Link(html.Div([html.I(className=f"bi {icon} card-icon"), html.H4(t), html.P(d)], className="nav-card"),
                            href=href) for href, icon, t, d in NAV_CARDS], className="nav-cards"),
         html.P(DISCLAIMER, className="disclaimer"),
@@ -87,6 +120,15 @@ def page_inicio():
 # --------------------------------------------------------------------------
 # 2–4. Textos
 # --------------------------------------------------------------------------
+def video_section():
+    """Video de presentación y demostración del proyecto (assets/video/presentacion.mp4)."""
+    return section("Video de presentación", "Recorrido por la plataforma, narrado por el equipo", [
+        html.Video(src="/assets/video/presentacion.mp4", poster="/assets/video/poster.jpg", controls=True,
+                   preload="metadata", className="project-video",
+                   children="Su navegador no puede reproducir este video."),
+        html.P("Duración: 13:16 · Alejandra Fuentes Acosta y Santiago Tinoco Román", className="video-caption")])
+
+
 def page_text(title, question, file, extra=None):
     body = [page_title(title, question), html.Div(md(file), className="card")]
     if extra:
@@ -124,7 +166,7 @@ def page_eda_uni(f):
     dt = np.diff(ev["t_days"].to_numpy()) * 24
     stats_rows = []
     for name, vals in (("Magnitud", ev["mag"]), ("Profundidad (km)", ev["depth"]),
-                       ("Energía por evento (log10 J)", 1.5 * ev["mag"] + 4.8),
+                       ("Energía por evento (log₁₀ J)", 1.5 * ev["mag"] + 4.8),
                        ("Tiempo entre eventos (h)", dt),
                        (f"Eventos por {FREQ_LABELS[f['freq']].split(' ')[0].lower()}", a["n"])):
         d = ac.descriptive(vals)
@@ -142,7 +184,7 @@ def page_eda_uni(f):
         section("Estadística descriptiva", "Resumen de cada variable con los filtros aplicados",
                 [simple_table(st, fmt_map),
                  html.Button("Descargar estadísticas (CSV)", id="btn-dl-uni", className="btn")],
-                interpretation=["Atípicos según Tukey (fuera de Q1 − 1.5·IQR y Q3 + 1.5·IQR). En variables "
+                interpretation=["Atípicos según Tukey (fuera de $[\\,Q_1 - 1.5\\,\\mathrm{IQR},\\; Q_3 + 1.5\\,\\mathrm{IQR}\\,]$). En variables "
                                 "asimétricas como la magnitud o los tiempos entre eventos, estos 'atípicos' son la "
                                 "cola natural de la distribución (sismos grandes, réplicas muy seguidas), no errores."]),
         html.Div([
@@ -160,12 +202,12 @@ def page_eda_uni(f):
                     f"¿Cuántos eventos ocurren por {FREQ_LABELS[f['freq']].split(' ')[0].lower()}?",
                     graph(tc.fig_hist_box(a["n"], "Eventos por periodo", bins=40)),
                     interpretation=f"Media {a['n'].mean():.2f}, varianza {a['n'].var():.2f}: la varianza es "
-                                   f"{a['n'].var() / max(a['n'].mean(), 1e-9):.1f} veces la media (Poisson = 1), "
+                                   f"{a['n'].var() / max(a['n'].mean(), 1e-9):.1f} veces la media (Poisson: $\\varphi = 1$), "
                                    "lo que indica sobredispersión por agrupamiento."),
             section("Tiempo entre eventos", "¿Cada cuánto ocurre un sismo?",
                     graph(tc.fig_interevent(np.diff(ev['t_days'].to_numpy()))),
-                    interpretation=f"Mediana {np.median(dt):.1f} h; CV = {np.std(dt, ddof=1) / np.mean(dt):.2f} "
-                                   "(un proceso de Poisson tendría CV = 1)."),
+                    interpretation=f"Mediana {np.median(dt):.1f} h; $CV = {np.std(dt, ddof=1) / np.mean(dt):.2f}$ "
+                                   "(un proceso de Poisson tendría $CV = 1$)."),
         ], className="two-col"),
         html.Div([
             section("Escalas de magnitud", "¿Qué tipo de magnitud reporta cada evento?",
@@ -211,12 +253,12 @@ def page_eda_multi(f):
               html.Div([
                   section("Magnitud frente a profundidad", "¿Los sismos profundos son más grandes o más pequeños?",
                           graph(tc.fig_mag_depth(ev)),
-                          interpretation=f"Correlación de Spearman ρ = {rho:.3f} (p = {p:.2g}). Con n = {len(d):,}, "
+                          interpretation=f"Correlación de Spearman $\\rho = {rho:.3f}$ ($p = {sci(p)}$). Con $n = {thou(len(d))}$, "
                                          "cualquier correlación sale 'significativa'; lo que importa es el tamaño: "
                                          f"{'despreciable' if abs(rho) < 0.1 else 'débil' if abs(rho) < 0.3 else 'moderada'}."),
                   section("Magnitud por clase de profundidad", "Comparación por categorías",
                           graph(tc.fig_box_by(ev, "mag", "depth_class", order, "Magnitud")),
-                          interpretation=(f"Kruskal-Wallis H = {kw.statistic:.1f}, p = {kw.pvalue:.2g}. Las medianas "
+                          interpretation=(f"Kruskal-Wallis $H = {kw.statistic:.1f}$, $p = {sci(kw.pvalue)}$. Las medianas "
                                           "son casi iguales: la diferencia, si existe, está en la cola de eventos grandes."
                                           if kw else "Clases insuficientes para comparar.")),
               ], className="two-col"),
@@ -226,9 +268,9 @@ def page_eda_multi(f):
         blocks.append(section("Frecuencia frente a magnitud (Gutenberg-Richter)",
                               "¿Cómo disminuye el número de eventos al aumentar la magnitud?",
                               graph(tc.fig_fmd(gr["fmd"], s["b"], gr["mc"])),
-                              interpretation=f"Mc = {gr['mc']:.1f} ({gr['method']}); b = {fmt(s['b'], '{:.3f}')} ± "
-                                             f"{fmt(s['sigma'], '{:.3f}')} (n = {s['n']:,}). Cada unidad de magnitud "
-                                             f"reduce el número de eventos unas {10 ** s['b']:.0f} veces."
+                              interpretation=f"$M_c = {gr['mc']:.1f}$ ({gr['method']}); $b = {fmt(s['b'], '{:.3f}')} \\pm "
+                                             f"{fmt(s['sigma'], '{:.3f}')}$ ($n = {s['n']}$). Cada unidad de magnitud "
+                                             f"reduce el número de eventos unas $10^{{b}} \\approx {10 ** s['b']:.0f}$ veces."
                               if s["valid"] else "Muestra insuficiente para b-value."))
     blocks.append(html.Div([
         section("Distribución espacial", "¿Dónde ocurren los eventos filtrados?", graph(fig_map),
@@ -324,19 +366,19 @@ def page_series(f):
     blocks.append(section("Estacionariedad", "¿Son constantes la media y la varianza de la serie?",
                           simple_table(tests_tab, {"Estadístico": "{:.3f}", "Valor crítico 5 %": "{:.3f}", "p-valor": "{:.4f}"}),
                           interpretation=[_stationarity_text(adf, kp),
-                                          "Supuestos: ADF con constante y rezagos fijos k = ⌊12(n/100)^¼⌋; KPSS con "
-                                          "ventana de Bartlett k = ⌊4(n/100)^¼⌋. Ambas suponen que la estructura "
+                                          "Supuestos: ADF con constante y rezagos fijos $k = \\lfloor 12\\,(n/100)^{1/4} \\rfloor$; KPSS con "
+                                          "ventana de Bartlett $k = \\lfloor 4\\,(n/100)^{1/4} \\rfloor$. Ambas suponen que la estructura "
                                           "de la serie no cambia; los cambios de nivel pueden hacer que rechacen las dos. "
-                                          "El p-valor de KPSS está acotado entre 0.01 y 0.10 por la tabla de referencia."]))
+                                          "El $p$-valor de KPSS está acotado entre 0.01 y 0.10 por la tabla de referencia."]))
     trend_txt = ("Serie demasiado larga para Mann-Kendall en esta resolución (n > 3.000): use semana o mes."
                  if mk is None else
-                 f"Mann-Kendall: S = {mk['S']:,.0f}, z = {mk['z']:.2f}, p = {mk['p_valor']:.2g}. Pendiente de Sen: "
-                 f"{mk['sen']:+.4f} por periodo. Con autocorrelación positiva el p-valor es optimista; además, parte "
+                 f"Mann-Kendall: $S = {mk['S']:.0f}$, $z = {mk['z']:.2f}$, $p = {sci(mk['p_valor'])}$. Pendiente de Sen: "
+                 f"${mk['sen']:+.4f}$ por periodo. Con autocorrelación positiva el p-valor es optimista; además, parte "
                  "de la tendencia en conteos M ≥ 5 puede deberse a cambios en la red y en las escalas de magnitud.")
     blocks.append(html.Div([
         section("Autocorrelación (ACF)", "¿Cuánto 'recuerda' la serie su pasado?",
                 graph(tc.fig_acf(t["acf"], t["band"], "acf", "")),
-                interpretation=f"Banda gris: ±1.96/√n = ±{t['band']:.3f}. Rezago 1: {t['acf']['acf'].iloc[1]:.3f}. "
+                interpretation=f"Banda gris: $\\pm 1.96/\\sqrt{{n}} = \\pm {t['band']:.3f}$. Rezago 1: $r_1 = {t['acf']['acf'].iloc[1]:.3f}$. "
                                "Autocorrelaciones positivas que decaen lentamente indican persistencia (secuencias "
                                "de réplicas y cambios de nivel)."),
         section("Autocorrelación parcial (PACF)", "¿Qué rezagos aportan información directa?",
@@ -352,7 +394,7 @@ def page_series(f):
                               graph(tc.fig_stl(stl)),
                               interpretation=[trend_txt,
                                               f"Fuerza de la estacionalidad (Wang et al., 2006): {strength:.3f} (0 = nula, 1 = dominante). "
-                                              + (f"Kruskal-Wallis entre meses del año: H = {kw['H']:.2f}, p = {kw['p_valor']:.3f}. "
+                                              + (f"Kruskal-Wallis entre meses del año: $H = {kw['H']:.2f}$, $p = {kw['p_valor']:.3f}$. "
                                                  if kw else "")
                                               + "No se espera estacionalidad física en la sismicidad tectónica.",
                                               "STL robusto con periodo 12, ventana estacional 13 y de tendencia 23."]))
@@ -373,7 +415,7 @@ def page_series(f):
                            simple_table(an_tab.rename(columns={"periodo": "Periodo", var: label, "mediana_previa": "Mediana previa",
                                                                "z_robusto": "z robusto"}).drop(columns="anomalia").tail(15),
                                         {"Mediana previa": "{:.2f}", "z robusto": "{:.2f}", label: "{:,.2f}"})],
-                          interpretation=[f"{n_an} periodos con |z| > {ts.PARAMS['anomaly_z']}, donde z se calcula con la "
+                          interpretation=[f"{n_an} periodos con $|z| > {ts.PARAMS['anomaly_z']}$, donde $z$ se calcula con la "
                                           f"mediana y la MAD de los {ts.PARAMS['anomaly_window'][freq]} periodos anteriores "
                                           "(se muestran los 15 más recientes). Casi todas las anomalías de conteo coinciden "
                                           "con secuencias de réplicas de sismos grandes.",
@@ -386,9 +428,9 @@ def page_series(f):
         phi = a["n"].var() / a["n"].mean() if a["n"].mean() > 0 else np.nan
         blocks.append(section("Agrupamiento temporal", "¿Los sismos llegan al azar o en ráfagas?",
                               graph(tc.fig_interevent(ie["dt"])),
-                              interpretation=f"Catálogo completo: CV de los tiempos entre eventos = {ie['cv']:.2f} "
-                                             f"(Poisson = 1); índice de dispersión de los conteos por periodo = {phi:.1f} "
-                                             "(Poisson = 1). Ambos indican agrupamiento: las réplicas llegan en ráfagas. "
+                              interpretation=f"Catálogo completo: $CV$ de los tiempos entre eventos $= {ie['cv']:.2f}$ "
+                                             f"(Poisson: $CV = 1$); índice de dispersión de los conteos por periodo $\\varphi = {phi:.1f}$ "
+                                             "(Poisson: $\\varphi = 1$). Ambos indican agrupamiento: las réplicas llegan en ráfagas. "
                                              "Con el catálogo desclusterizado el índice de dispersión baja."))
     return blocks
 
@@ -398,23 +440,64 @@ def page_series(f):
 # --------------------------------------------------------------------------
 def page_modelos(f, test_months, monitor_window):
     k = ac.key(f)
-    ev = ac.model_eval(k, test_months)
-    s = ac.series(k, "M")
+    var, vlabel, unit, ylab = model_target(f)
+    d = ac.model_data(k, var)
+    ev = ac.model_eval(k, test_months, var)
+    s = pd.DataFrame({"periodo": d["periodo"], "n": d["y"]}) if d["ok"] else ac.series(k, "M")
+    labels = fcm.model_labels(var)
     head = [page_title("Modelos", "¿Qué métodos describen y pronostican mejor la frecuencia mensual de eventos?"),
             filter_note(f),
             section("Métodos seleccionados y justificación", "¿Por qué estos modelos y no una regresión?",
                     dcc.Markdown("""
-- **Variable modelada:** número de eventos por mes. Es la resolución más fina con pocos meses vacíos en la mayoría de regiones (ver *Series de tiempo*). La magnitud y la energía no se pronostican: dependen de eventos individuales y la energía la domina un único sismo.
+- **Variable modelada:** la elegida en el filtro *Variable*, siempre agregada por mes (por defecto, número de eventos por mes: la resolución más fina con pocos meses vacíos en la mayoría de regiones). La magnitud, la profundidad y la energía solo existen en meses con eventos: se modelan si faltan como máximo el 5 % de los meses (los huecos se interpolan); si no, la sección lo indica. Con la energía, un único sismo grande domina el mes, así que su pronóstico es poco informativo.
 - **Sin regresión:** el enfoque anterior relacionaba variables independientes entre sí. Aquí la información está en la propia historia de la serie (autocorrelación), así que se usan modelos de series de tiempo.
 - **Referencias obligatorias:** *Ingenuo* (repite el último mes) y *Media histórica* (con intervalos de una Binomial Negativa, porque los conteos están sobredispersos). Un modelo solo aporta si supera a estas referencias.
 - **Suavizamiento exponencial simple:** pondera más los meses recientes. Es adecuado para un nivel que cambia lentamente, sin tendencia ni estacionalidad marcadas (lo que muestran STL y Kruskal-Wallis).
 - **ARIMA(1,0,1) con media:** recoge la autocorrelación de corto plazo que muestran la ACF y la PACF. Supone estacionariedad alrededor de la media; las pruebas ADF/KPSS indican cambios de nivel, así que sus intervalos pueden ser optimistas.
 - **No se usó SARIMA:** la estacionalidad anual es débil (ver STL), así que un término estacional añadiría parámetros sin justificación.
-- **Validación temporal:** los últimos meses son el conjunto de prueba y nunca se usan para ajustar. Métricas: MAE, RMSE y MASE (MASE < 1 = mejor que el ingenuo de un paso dentro del entrenamiento).
+- **Validación temporal:** los últimos meses son el conjunto de prueba y nunca se usan para ajustar. Métricas: MAE, RMSE y MASE ($\\text{MASE} < 1$: mejor que el ingenuo de un paso dentro del entrenamiento).
 - **Dos formas de evaluar:** el pronóstico *a varios meses* se hace una sola vez al final del entrenamiento; el pronóstico *a un mes vista* usa en cada mes lo observado hasta el mes anterior, con los mismos parámetros. La segunda muestra cómo el modelo sigue la dinámica de la serie.
-""", className="markdown"))]
+
+**Ecuaciones de los modelos** ($y_t$: valor del mes $t$; $\\hat{y}_{t+h \\mid t}$: pronóstico a $h$ meses con lo observado hasta $t$; $T$: meses de entrenamiento):
+
+- Ingenuo:
+
+  $$\\displaystyle \\hat{y}_{t+h \\mid t} = y_t$$
+
+- Media histórica (para conteos con $s^2 > \\bar{y}$, intervalos de una Binomial Negativa ajustada por momentos; Poisson si $s^2 \\le \\bar{y}$):
+
+  $$\\displaystyle \\hat{y}_{t+h \\mid t} = \\bar{y} = \\frac{1}{T}\\sum_{t=1}^{T} y_t, \\qquad r = \\frac{\\bar{y}^{2}}{s^{2} - \\bar{y}}, \\qquad p = \\frac{r}{r + \\bar{y}}$$
+
+- Suavizamiento exponencial simple:
+
+  $$\\displaystyle \\ell_t = \\alpha\\, y_t + (1 - \\alpha)\\,\\ell_{t-1}, \\qquad \\hat{y}_{t+h \\mid t} = \\ell_t, \\qquad 0 < \\alpha < 1$$
+
+- ARIMA(1,0,1) con media:
+
+  $$\\displaystyle y_t - \\mu = \\phi\\,(y_{t-1} - \\mu) + \\varepsilon_t + \\theta\\,\\varepsilon_{t-1}, \\qquad \\varepsilon_t \\sim \\mathcal{N}(0, \\sigma^2)$$
+
+- Intervalos gaussianos (ingenuo, SES y ARIMA), truncados en 0:
+
+  $$\\displaystyle \\hat{y}_{t+h \\mid t} \\pm z_{1-\\gamma/2}\\,\\hat{\\sigma}_h, \\qquad \\hat{\\sigma}_h^{\\,\\text{SES}} = \\hat{\\sigma}\\sqrt{1 + (h-1)\\,\\alpha^{2}}, \\qquad \\hat{\\sigma}_h^{\\,\\text{ingenuo}} = \\hat{\\sigma}_{\\Delta}\\sqrt{h}$$
+
+- Métricas en los $H$ meses de prueba, con $e_t = y_t - \\hat{y}_t$:
+
+  $$\\displaystyle \\text{MAE} = \\frac{1}{H}\\sum_{t} \\lvert e_t \\rvert, \\qquad \\text{RMSE} = \\sqrt{\\frac{1}{H}\\sum_{t} e_t^{2}}, \\qquad \\text{MASE} = \\frac{\\text{MAE}}{\\frac{1}{T-1}\\sum_{t=2}^{T} \\lvert y_t - y_{t-1} \\rvert}$$
+""", mathjax=True, className="markdown")),
+            html.Div(f"Variable modelada: {vlabel} por mes.", className="filter-note")]
+    note = model_note(d)
+    monitor = section("Monitor de ventana reciente (detección de anomalías)",
+                "¿La actividad de la ventana reciente está fuera de su historial? (motor del dashboard anterior)",
+                [dcc.RadioItems(id="mon-window", value=monitor_window, className="pills",
+                                options=[{"label": f"{w} días", "value": w} for w in (30, 90, 180, 365, 730)]),
+                 dcc.Loading(html.Div(id="monitor-content"), type="dot", color="#1f5f74")],
+                interpretation="Compara la ventana más reciente con todas las ventanas históricas de igual duración "
+                               "(percentiles y Binomial Negativa). Se conserva del dashboard anterior como método de "
+                               "detección de anomalías.")
     if ev is None:
-        return head + [html.Div("La serie mensual es demasiado corta para entrenar y evaluar con estos filtros.", className="warning-box")]
+        return head + [note, monitor]
+    if note is not None:
+        head.append(note)
     tab = ev["table"].copy()
     best = tab.loc[tab["MASE"].idxmin()]
     view = tab.drop(columns="clave").rename(columns={"modelo": "Modelo", "cobertura_95": "Cobertura IC95 (%)",
@@ -424,29 +507,22 @@ def page_modelos(f, test_months, monitor_window):
     blocks = head + [
         section(f"Evaluación en los últimos {test_months} meses",
                 f"Entrenamiento hasta {ev['train_end']:%Y-%m}; prueba {ev['test_periods'].iloc[0]:%Y-%m} → {ev['test_periods'].iloc[-1]:%Y-%m}",
-                [graph(tc.fig_model_test(s, ev, MODELS)),
+                [graph(tc.fig_model_test(s, ev, labels, ylab)),
                  simple_table(view, {"MAE": "{:.2f}", "RMSE": "{:.2f}", "MASE": "{:.3f}", "Cobertura IC95 (%)": "{:.1f}",
                                      "MAE a 1 mes": "{:.2f}", "MASE a 1 mes": "{:.3f}",
                                      "Ljung-Box p (residuos)": "{:.3f}"}),
                  html.Button("Descargar evaluación (CSV)", id="btn-dl-eval", className="btn")],
-                interpretation=[f"Menor error en el periodo de prueba: {best['modelo']} (MASE = {best['MASE']:.3f}). "
-                                + ("Ningún modelo supera al ingenuo de un paso (MASE > 1): los pronósticos a varios meses "
+                interpretation=[f"Menor error en el periodo de prueba: {best['modelo']} ($\\text{{MASE}} = {best['MASE']:.3f}$). "
+                                + ("Ningún modelo supera al ingenuo de un paso ($\\text{MASE} > 1$): los pronósticos a varios meses "
                                    "son difíciles porque las secuencias de réplicas no se pueden anticipar."
                                    if best["MASE"] >= 1 else "Este modelo mejora al ingenuo de un paso."),
-                                "Ljung-Box (12 rezagos) sobre los residuos del entrenamiento: p < 0.05 indica que queda "
+                                "Ljung-Box (12 rezagos) sobre los residuos del entrenamiento: $p < 0.05$ indica que queda "
                                 "autocorrelación sin explicar. Cobertura: porcentaje de meses de prueba dentro del "
                                 "intervalo del 95 % (lo ideal es cerca de 95 %)."]),
         section("Diagnóstico de residuos", f"¿Los residuos del mejor modelo ({best['modelo']}) son ruido blanco?",
                 graph(tc.fig_residual_acf(ev["paths"][sel_model]["resid"])),
                 interpretation="Si las barras quedan dentro de la banda gris, el modelo captó la dependencia temporal."),
-        section("Monitor de ventana reciente (detección de anomalías)",
-                "¿La actividad de la ventana reciente está fuera de su historial? (motor del dashboard anterior)",
-                [dcc.RadioItems(id="mon-window", value=monitor_window, className="pills",
-                                options=[{"label": f"{w} días", "value": w} for w in (30, 90, 180, 365, 730)]),
-                 dcc.Loading(html.Div(id="monitor-content"), type="dot", color="#1f5f74")],
-                interpretation="Compara la ventana más reciente con todas las ventanas históricas de igual duración "
-                               "(percentiles y Binomial Negativa). Se conserva del dashboard anterior como método de "
-                               "detección de anomalías."),
+        monitor,
     ]
     return blocks
 
@@ -455,7 +531,7 @@ def page_modelos(f, test_months, monitor_window):
 # 9. Predecir
 # --------------------------------------------------------------------------
 def page_predecir_controls(model, horizon):
-    return section("Configuración del pronóstico", "Variable pronosticada: número de eventos M ≥ Mmin por mes",
+    return section("Configuración del pronóstico", "Variable pronosticada: la elegida en el filtro 'Variable', por mes",
                    html.Div([
                        html.Div([html.Label("Modelo"), dcc.Dropdown(id="pred-model", value=model, clearable=False,
                                 options=[{"label": v, "value": k} for k, v in MODELS.items()])], className="control"),
@@ -469,12 +545,17 @@ def page_predecir_controls(model, horizon):
 
 def page_predecir_result(f, model, h):
     k = ac.key(f)
-    s = ac.series(k, "M")
-    if len(s) < 72:
-        return html.Div("La serie mensual es demasiado corta para pronosticar con estos filtros.", className="warning-box")
-    fcst = ac.model_forecast(k, model, h)
-    sims = ac.model_simulations(k, model, h)
-    ev = ac.model_eval(k, ts.PARAMS["forecast"]["test_months"])
+    var, vlabel, unit, ylab = model_target(f)
+    d = ac.model_data(k, var)
+    note = model_note(d)
+    if not d["ok"]:
+        return note
+    s = pd.DataFrame({"periodo": d["periodo"], "n": d["y"]})
+    fcst = ac.model_forecast(k, model, h, var)
+    sims = ac.model_simulations(k, model, h, var)
+    ev = ac.model_eval(k, ts.PARAMS["forecast"]["test_months"], var)
+    mlabel = fcm.model_label(model, var)
+    u = f" {unit}" if unit else ""
     row = ev["table"].set_index("clave").loc[model] if ev else None
     tab = fcst.copy()
     tab["periodo"] = tab["periodo"].dt.strftime("%Y-%m")
@@ -482,14 +563,16 @@ def page_predecir_result(f, model, h):
     last_obs, first_fc = s["periodo"].iloc[-1], fcst["periodo"].iloc[0]
     incomplete = pd.Timestamp(f["end"]) < first_fc + pd.offsets.MonthEnd(0)
     mu = s["n"].mean()
-    shape = {"naive": f"El ingenuo repite el último mes observado ({s['n'].iloc[-1]:.0f} eventos); por eso es una línea horizontal y sus intervalos se abren rápido.",
-             "mean": f"La media histórica pronostica el promedio del periodo ({mu:.1f} eventos/mes) para todos los meses; sus intervalos (Binomial Negativa) no cambian con el horizonte.",
-             "ses": f"El SES pronostica el último nivel suavizado ({fcst['pronostico'].iloc[0]:.1f} eventos/mes) para todos los meses: sin tendencia ni estacionalidad, el mejor valor esperado es el nivel actual.",
-             "arima": f"El ARIMA(1,0,1) parte del último mes y vuelve hacia la media de la serie ({fcst['pronostico'].iloc[0]:.1f} → {fcst['pronostico'].iloc[-1]:.1f} eventos/mes): la autocorrelación de corto plazo se diluye en pocos meses."}[model]
-    blocks = [
-        section("Serie observada y pronóstico", f"{MODELS[model]} · horizonte {h} meses · desde {first_fc:%Y-%m}",
-                [graph(tc.fig_forecast(s, fcst, MODELS[model], sims)),
-                 simple_table(tab, {c: "{:.1f}" for c in tab.columns if c != "Mes"}),
+    pu = "eventos/mes" if var == "n" else unit
+    pu = f" {pu}" if pu else ""
+    shape = {"naive": f"El ingenuo repite el último mes observado ({s['n'].iloc[-1]:.4g}{u}); por eso es una línea horizontal y sus intervalos se abren rápido.",
+             "mean": f"La media histórica pronostica el promedio del periodo ({mu:.4g}{pu}) para todos los meses; sus intervalos ({'Binomial Negativa' if var == 'n' else 'normales'}) no cambian con el horizonte.",
+             "ses": f"El SES pronostica el último nivel suavizado ({fcst['pronostico'].iloc[0]:.4g}{pu}) para todos los meses: sin tendencia ni estacionalidad, el mejor valor esperado es el nivel actual.",
+             "arima": f"El ARIMA(1,0,1) parte del último mes y vuelve hacia la media de la serie ({fcst['pronostico'].iloc[0]:.4g} → {fcst['pronostico'].iloc[-1]:.4g}{pu}): la autocorrelación de corto plazo se diluye en pocos meses."}[model]
+    blocks = ([note] if note is not None else []) + [
+        section("Serie observada y pronóstico", f"{vlabel} · {mlabel} · horizonte {h} meses · desde {first_fc:%Y-%m}",
+                [graph(tc.fig_forecast(s, fcst, mlabel, sims, ylab=ylab, unit=unit, count=var == "n")),
+                 simple_table(tab, {c: ("{:.1f}" if var == "n" else "{:.3f}") for c in tab.columns if c != "Mes"}),
                  html.Button("Descargar pronóstico (CSV)", id="btn-dl-forecast", className="btn")],
                 interpretation=[
                     f"El modelo se reajusta con todos los meses completos hasta {last_obs:%Y-%m}"
@@ -502,20 +585,20 @@ def page_predecir_result(f, model, h):
     if ev is not None:
         blocks.append(section(
             "Validación del modelo: pronóstico a un mes vista",
-            f"¿Cómo se habría comportado {MODELS[model]} en los últimos {ts.PARAMS['forecast']['test_months']} meses?",
-            graph(tc.fig_backtest(s, ev, model, MODELS[model])),
+            f"¿Cómo se habría comportado {mlabel} en los últimos {ts.PARAMS['forecast']['test_months']} meses?",
+            graph(tc.fig_backtest(s, ev, model, mlabel, ylab=ylab, unit=unit)),
             interpretation=[
                 "El modelo se ajusta solo con los meses anteriores al periodo de prueba. La línea discontinua gris es el "
                 "pronóstico hecho una sola vez al final del entrenamiento (varios meses hacia adelante); la línea azul "
                 "es el pronóstico a un mes vista, que en cada mes usa lo observado hasta el mes anterior.",
-                f"Pronóstico a varios meses: MAE = {row['MAE']:.1f}, RMSE = {row['RMSE']:.1f}, MASE = {row['MASE']:.3f}, "
-                f"cobertura del IC95 = {row['cobertura_95']:.0f} %. Pronóstico a un mes vista: MAE = {row['MAE_1paso']:.1f}, "
-                f"MASE = {row['MASE_1paso']:.3f}.",
+                f"Pronóstico a varios meses: $\\text{{MAE}} = {row['MAE']:.3g}$, $\\text{{RMSE}} = {row['RMSE']:.3g}$, $\\text{{MASE}} = {row['MASE']:.3f}$, "
+                f"cobertura del IC95 = {row['cobertura_95']:.0f} %. Pronóstico a un mes vista: $\\text{{MAE}} = {row['MAE_1paso']:.3g}$, "
+                f"$\\text{{MASE}} = {row['MASE_1paso']:.3f}$.",
                 "Los picos (meses con secuencias de réplicas) no se anticipan: el modelo reacciona al mes siguiente. "
-                "Por eso un MASE cercano o superior a 1 es esperable en esta serie."]))
+                "Por eso un $\\text{MASE}$ cercano o superior a 1 es esperable en esta serie."]))
     return html.Div(blocks + [
         section("Supuestos y limitaciones", "Cómo leer este pronóstico", dcc.Markdown(f"""
-- **Qué se pronostica:** el número de eventos M ≥ {f['min_mag']:.1f} por mes en la región *{f['region']}* ({'catálogo completo' if f['catalog'] == 'complete' else 'catálogo desclusterizado'}). No se pronostican sismos individuales.
+- **Qué se pronostica:** {('el número de eventos' if var == 'n' else 'la variable *' + vlabel + '* de los eventos')} M ≥ {f['min_mag']:.1f} por mes en la región *{f['region']}* ({'catálogo completo' if f['catalog'] == 'complete' else 'catálogo desclusterizado'}). No se pronostican sismos individuales.
 - **Supuestos:** el proceso futuro se comporta como el pasado reciente (nivel y variabilidad); los cambios de red o de escalas de magnitud no se repiten; los intervalos de SES y ARIMA son gaussianos, se truncan en 0 y no incluyen la incertidumbre de los parámetros.
 - **Limitaciones:** un sismo grande genera cientos de réplicas en pocas semanas, y ningún modelo de esta sección puede anticiparlo: esos meses quedarán fuera de los intervalos. Con el catálogo desclusterizado la serie es más estable y los intervalos son más fiables.
 - **{DISCLAIMER}**

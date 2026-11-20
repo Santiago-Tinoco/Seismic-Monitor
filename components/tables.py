@@ -110,5 +110,5 @@ def events_table(ev: pd.DataFrame, table_id="events-table"):
 
 
 def percentile_note():
-    return (f"Estado: dentro del rango = P{P_LOW:.0f}–P{P_HIGH:.0f}; fuera de ese rango = inusual respecto al "
+    return (f"Estado: dentro del rango = $P_{{{P_LOW:.0f}}}$–$P_{{{P_HIGH:.0f}}}$; fuera de ese rango = inusual respecto al "
             "historial de la región. Es una regla operacional del proyecto, no un umbral físico.")

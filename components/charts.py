@@ -249,7 +249,7 @@ def fig_b_series(mf: dict):
         fig.add_hline(y=mf["hist"]["b"], line=dict(color=COLORS["hist_dark"], width=1, dash="dash"),
                       annotation_text=f"b histórico = {mf['hist']['b']:.2f}", annotation_position="top left",
                       annotation_font=dict(size=10, color=COLORS["muted"]))
-    fig.update_layout(height=320, yaxis_title="b-value (± 1.96 σ Shi-Bolt)",
+    fig.update_layout(height=320, yaxis_title="b-value (± 1.96 σ<sub>b</sub>, Shi-Bolt)",
                       xaxis_title=f"Periodos consecutivos de {mf['years_rec']} años (el último es el reciente)")
     return fig
 

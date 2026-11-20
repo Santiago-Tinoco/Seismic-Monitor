@@ -167,14 +167,14 @@ INDICATORS = [
 INDICATOR_HELP = {
     "n_events": "Eventos con M ≥ magnitud mínima en la ventana. Indicador principal del estado general.",
     "max_mag": "Mayor magnitud de la ventana. Solo se comparan ventanas con al menos un evento.",
-    "energy": "Suma de energías estimadas con log10 E = 1.5M + 4.8 (J). Depende casi por completo del evento mayor, "
+    "energy": "Suma de energías estimadas con $\\log_{10} E = 1.5\\,M + 4.8$ (J). Depende casi por completo del evento mayor, "
               "por eso no es independiente de la magnitud máxima.",
     "median_depth": f"Mediana de las profundidades observadas (≥ {MIN_EVENTS_DEPTH} eventos). "
                     "El 43 % del catálogo tiene profundidades fijas (10/33/35 km).",
     "dep_frac": "Proporción de eventos de la ventana que el declustering de Gardner-Knopoff asigna a una secuencia "
                 "(réplicas o premonitores). Mide agrupamiento espacio-temporal.",
     "cv": f"Coeficiente de variación de los tiempos entre eventos (≥ {MIN_EVENTS_CLUSTER} eventos). "
-          "CV ≈ 1: ocurrencia tipo Poisson; CV > 1: eventos agrupados en el tiempo.",
+          "$CV \\approx 1$: ocurrencia tipo Poisson; $CV > 1$: eventos agrupados en el tiempo.",
     "nn_km": f"Mediana de la distancia de cada evento a su vecino más cercano (≥ {MIN_EVENTS_CLUSTER} eventos). "
              "Valores bajos: eventos más concentrados en el espacio.",
 }

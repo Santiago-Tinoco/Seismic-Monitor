@@ -22,7 +22,7 @@ def fig_hist_box(values, xlabel, bins=40, log_x=False, color=ACCENT):
                                hovertemplate="%{x}<br>%{y:,} eventos<extra></extra>", showlegend=False), 1, 1)
     fig.add_trace(go.Box(x=x, marker=dict(color=color, size=3), line=dict(color=color), boxpoints="outliers",
                          name="", showlegend=False, hoverinfo="x"), 2, 1)
-    fig.update_xaxes(title_text=("log10 " + xlabel) if log_x else xlabel, row=2, col=1)
+    fig.update_xaxes(title_text=("log<sub>10</sub> " + xlabel) if log_x else xlabel, row=2, col=1)
     fig.update_yaxes(title_text="Eventos", row=1, col=1)
     fig.update_yaxes(showticklabels=False, row=2, col=1)
     fig.update_layout(height=340, bargap=0.05)
@@ -199,8 +199,8 @@ def fig_stl(stl: pd.DataFrame):
 def fig_interevent(dt):
     v = np.log10(np.asarray(dt)[np.asarray(dt) > 0] * 24)
     fig = go.Figure(go.Histogram(x=v, nbinsx=60, marker=dict(color=ACCENT, line=dict(color="white", width=0.5)),
-                                 hovertemplate="log10 horas %{x}<br>%{y:,}<extra></extra>"))
-    fig.update_layout(height=300, xaxis_title="log10 (tiempo entre eventos, horas)", yaxis_title="Frecuencia")
+                                 hovertemplate="log<sub>10</sub> horas %{x}<br>%{y:,}<extra></extra>"))
+    fig.update_layout(height=300, xaxis_title="log<sub>10</sub> (tiempo entre eventos, horas)", yaxis_title="Frecuencia")
     return fig
 
 
@@ -210,7 +210,7 @@ def fig_interevent(dt):
 MODEL_COLORS = {"naive": "#9aa5ab", "mean": "#c4741c", "ses": "#1f5f74", "arima": "#2b6a9e"}
 
 
-def fig_model_test(series, ev, labels):
+def fig_model_test(series, ev, labels, ylab="Eventos por mes"):
     fig = go.Figure()
     hist = series.iloc[-(len(ev["test"]) + 60):]
     fig.add_trace(go.Scatter(x=hist["periodo"], y=hist["n"], mode="lines", line=dict(color=COLORS["ink"], width=1.5),
@@ -222,14 +222,14 @@ def fig_model_test(series, ev, labels):
     fig.add_vrect(x0=ev["test_periods"].iloc[0], x1=ev["test_periods"].iloc[-1], fillcolor="#eef0ee", line_width=0, layer="below")
     fig.add_annotation(x=ev["test_periods"].iloc[0], y=1, yref="paper", text="periodo de prueba", showarrow=False,
                        xanchor="left", font=dict(size=11, color=COLORS["muted"]))
-    fig.update_layout(height=380, yaxis_title="Eventos por mes", xaxis_title="Mes")
+    fig.update_layout(height=380, yaxis_title=ylab, xaxis_title="Mes")
     return fig
 
 
 SIM_COLORS = ["#c4741c", "#8a5a9e", "#4f8a5b"]
 
 
-def fig_forecast(series, fc, label, sims=None, years_view=6):
+def fig_forecast(series, fc, label, sims=None, years_view=6, ylab="Eventos por mes", unit="eventos", count=True):
     """Serie observada completa + pronóstico, intervalos, media histórica y trayectorias simuladas.
 
     La vista inicial muestra los últimos `years_view` años (los botones permiten ampliar), para que
@@ -246,29 +246,35 @@ def fig_forecast(series, fc, label, sims=None, years_view=6):
                              fill="toself", fillcolor="rgba(31,95,116,0.25)", line=dict(width=0),
                              name="Intervalo 80 %", hoverinfo="skip"))
     fig.add_trace(go.Scatter(x=series["periodo"], y=series["n"], mode="lines", line=dict(color=COLORS["ink"], width=1.4),
-                             name="Observado", hovertemplate="%{x|%Y-%m}: %{y} eventos<extra></extra>"))
+                             name="Observado", hovertemplate="%{x|%Y-%m}: %{y:.4~g} " + unit + "<extra></extra>"))
     if sims is not None:
         for i, path in enumerate(sims):
             fig.add_trace(go.Scatter(x=xb, y=[last_y] + list(path), mode="lines",
                                      line=dict(color=SIM_COLORS[i % 3], width=1.2, dash="dot"), opacity=0.85,
                                      legendgroup="sims", showlegend=i == 0,
                                      name="Trayectorias simuladas (escenarios posibles)",
-                                     hovertemplate="%{x|%Y-%m}: %{y:.0f} eventos<extra>Escenario " + str(i + 1) + "</extra>"))
+                                     hovertemplate="%{x|%Y-%m}: %{y:.4~g} " + unit + "<extra>Escenario " + str(i + 1) + "</extra>"))
     fig.add_trace(go.Scatter(x=xb, y=[last_y] + list(fc["pronostico"]), mode="lines+markers",
                              line=dict(color=ACCENT, width=3), marker=dict(size=6), name=f"Pronóstico medio — {label}",
                              customdata=np.vstack([[[last_y, last_y]], np.stack([fc["lo95"], fc["hi95"]], axis=-1)]),
-                             hovertemplate="%{x|%Y-%m}: %{y:.1f} eventos<br>IC95 %{customdata[0]:.0f}–%{customdata[1]:.0f}<extra></extra>"))
+                             hovertemplate="%{x|%Y-%m}: %{y:.4~g} " + unit + "<br>IC95 %{customdata[0]:.4~g}–%{customdata[1]:.4~g}<extra></extra>"))
     mu = float(series["n"].mean())
     fig.add_hline(y=mu, line=dict(color=COLORS["muted"], width=1, dash="dash"),
-                  annotation_text=f"media histórica {mu:.0f}", annotation_position="top left",
+                  annotation_text=f"media histórica {mu:.0f}" if count else f"media histórica {mu:.2f}", annotation_position="top left",
                   annotation_font=dict(size=11, color=COLORS["muted"]))
     fig.add_vline(x=last_p, line=dict(color=COLORS["muted"], width=1, dash="dot"))
     x0 = last_p - pd.DateOffset(years=years_view)
     x1 = x[-1] + pd.DateOffset(months=2)
-    ymax = max(float(series.loc[series["periodo"] >= x0, "n"].max()), float(np.max(fc["hi95"])),
-               float(np.max(sims)) if sims is not None else 0) * 1.08
-    fig.update_layout(height=460, yaxis_title="Eventos por mes", xaxis_title="Mes",
-                      yaxis=dict(range=[0, ymax]),
+    view = series.loc[series["periodo"] >= x0, "n"]
+    ymax = max(float(view.max()), float(np.max(fc["hi95"])), float(np.max(sims)) if sims is not None else 0)
+    if count:
+        yrange = [0, ymax * 1.08]
+    else:                                # variables continuas: el eje no empieza en 0 (p. ej. magnitud ≈ 5–6)
+        ymin = min(float(view.min()), float(np.min(fc["lo95"])), float(np.min(sims)) if sims is not None else np.inf)
+        pad = 0.06 * (ymax - ymin or 1)
+        yrange = [ymin - pad, ymax + pad]
+    fig.update_layout(height=460, yaxis_title=ylab, xaxis_title="Mes",
+                      yaxis=dict(range=yrange),
                       xaxis=dict(range=[x0, x1], rangeselector=dict(
                           buttons=[dict(count=3, label="3 años", step="year", stepmode="backward"),
                                    dict(count=6, label="6 años", step="year", stepmode="backward"),
@@ -278,7 +284,7 @@ def fig_forecast(series, fc, label, sims=None, years_view=6):
     return fig
 
 
-def fig_backtest(series, ev, model, label, before=24):
+def fig_backtest(series, ev, model, label, before=24, ylab="Eventos por mes", unit="eventos"):
     """Validación temporal del modelo elegido: pronóstico a un paso vs. a varios pasos vs. observado."""
     p = ev["paths"][model]
     tp = list(ev["test_periods"])
@@ -288,7 +294,7 @@ def fig_backtest(series, ev, model, label, before=24):
                              fillcolor="rgba(31,95,116,0.10)", line=dict(width=0),
                              name="IC95 del pronóstico a varios meses", hoverinfo="skip"))
     fig.add_trace(go.Scatter(x=hist["periodo"], y=hist["n"], mode="lines+markers", line=dict(color=COLORS["ink"], width=1.6),
-                             marker=dict(size=4), name="Observado", hovertemplate="%{x|%Y-%m}: %{y} eventos<extra></extra>"))
+                             marker=dict(size=4), name="Observado", hovertemplate="%{x|%Y-%m}: %{y:.4~g} " + unit + "<extra></extra>"))
     fig.add_trace(go.Scatter(x=tp, y=p["mean"], mode="lines", line=dict(color=COLORS["muted"], width=2, dash="dash"),
                              name="Pronóstico a varios meses (desde el fin del entrenamiento)",
                              hovertemplate="%{x|%Y-%m}: %{y:.1f}<extra></extra>"))
@@ -298,7 +304,7 @@ def fig_backtest(series, ev, model, label, before=24):
     fig.add_vrect(x0=tp[0], x1=tp[-1], fillcolor="#eef0ee", line_width=0, layer="below")
     fig.add_annotation(x=tp[0], y=1, yref="paper", text="periodo de prueba (no usado para ajustar)", showarrow=False,
                        xanchor="left", font=dict(size=11, color=COLORS["muted"]))
-    fig.update_layout(height=400, yaxis_title="Eventos por mes", xaxis_title="Mes")
+    fig.update_layout(height=400, yaxis_title=ylab, xaxis_title="Mes")
     return fig
 
 

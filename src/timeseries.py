@@ -28,7 +28,7 @@ VARIABLES = {
     "mag_mean": "Magnitud media",
     "mag_max": "Magnitud máxima",
     "depth_mean": "Profundidad media (km)",
-    "energy_log10": "Energía liberada (log10 J)",
+    "energy_log10": "Energía liberada (log₁₀ J)",
 }
 
 
